@@ -10,3 +10,12 @@ Internal BUG users: the data is stored in `ScanData\open-UST-imaging-and-evaluat
 ```
 addpath(genpath("Y:\open-UST-imaging-and-evaluation"))
 ```
+
+## Requirements
+
+- Matlab 2022a or more recent
+- Matlab toolboxes:
+  - Signal processing
+  - Curve fitting
+- [k-Wave](https://github.com/ucl-bug/k-wave)
+- [ust-sart](https://github.com/ucl-bug/ust-sart)
