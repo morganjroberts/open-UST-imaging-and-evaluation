@@ -6,7 +6,7 @@ This repo contains code for analysing experimental data from the open-UST system
 ## Accessing Experimental Data
 The experimental data files are too large to store on GitHub. If you are external from the Biomedical Ultrasound Group, please get in contact to request access to the data.
 
-Internal BUG users: the data is stored in `ScanData\open-UST-imaging-and-evaluation`. When running these scripts in Matlab, first map the `ScanData` network drive to your PC and add the data subfolder to the path, for example:
+Internal BUG users: the data is stored in `Datasets\open-UST-imaging-and-evaluation`. When running these scripts in Matlab, first map the `Datasets` network drive to your PC, or make a local copy. Then, add the data subfolder to the Maltab path, for example:
 ```
 addpath(genpath("Y:\open-UST-imaging-and-evaluation"))
 ```
