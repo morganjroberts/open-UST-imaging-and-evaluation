@@ -15,25 +15,25 @@
 %     Datasets\open-UST-imaging-and-evaluation\transmit_impulse_response
 %
 % INPUT DATA FILENAMES:
-%     transmit_impulse_response_probe_q.mat                module Q (without acoustic matching layers)
-%     transmit_impulse_response_probes_AEFG.mat            modules A, E, F and G (with acoustic matching layers)
-%     transmit_impulse_response_probes_A22uH.mat           module A driven thorugh electrical impedance matching inductors
+%     transmit_impulse_response_probe_q.mat        module Q (without acoustic matching layers)
+%     transmit_impulse_response_probes_AEFG.mat    modules A, E, F and G (with acoustic matching layers)
+%     transmit_impulse_response_probes_A22uH.mat   module A driven thorugh electrical impedance matching inductors
 %
 % EXPERIMENTAL PARAMETERS:
-%     transmit_impulse_response_experimental_parameters.md details of the experimental setup and data extraction/calibration procedure
+%     \transmit_impulse_response\transmit_impulse_response_experimental_parameters.md (cd to local git repo first)
 %
 % FIGURE OUTPUT DIRECTORY:
-%     \transmit-bandwidth\figures (cd to local git repo first)
+%     \transmit_impulse_response\figures (cd to local git repo first)
 %
-% FIGURE OUTPUT FILENAMES:
-%     filename  subplot [2,1] (time-vs-voltage and frequency-vs-voltage) showing mean plus measured variation for impulse_response_probe_q
-%     filename  subplot [2,1] (time-vs-voltage and frequency-vs-voltage) showing mean plus measured variation for impulse_response_probes_AEFG
-%     filename  subplot [2,1] (time-vs-voltage and frequency-vs-voltage) showing mean plus measured variation for impulse_response_probes_A22uH
-%     filename  subplot [2,1] (time-vs-voltage and frequency-vs-voltage) showing mean of all three datasets
-%     filename  subplot [1,3] histogram of centre-frequency, bandwidth for impulse_response_probe_q
-%     filename  subplot [1,3] histogram of centre-frequency, bandwidth for impulse_response_probes_AEFG
-%     filename  subplot [1,3] histogram of centre-frequency, bandwidth for impulse_response_probes_A22uH
-%     filename  subplot [1,3] histogram of centre-frequency, bandwidth for all three datasets
+% FIGURE OUTPUT:
+%     subplot [2,1] (time-vs-voltage and frequency-vs-voltage) showing mean plus measured variation for impulse_response_probe_q
+%     subplot [2,1] (time-vs-voltage and frequency-vs-voltage) showing mean plus measured variation for impulse_response_probes_AEFG
+%     subplot [2,1] (time-vs-voltage and frequency-vs-voltage) showing mean plus measured variation for impulse_response_probes_A22uH
+%     subplot [2,1] (time-vs-voltage and frequency-vs-voltage) showing mean of all three datasets
+%     subplot [1,3] histogram of centre-frequency, bandwidth for impulse_response_probe_q
+%     subplot [1,3] histogram of centre-frequency, bandwidth for impulse_response_probes_AEFG
+%     subplot [1,3] histogram of centre-frequency, bandwidth for impulse_response_probes_A22uH
+%     subplot [1,3] histogram of centre-frequency, bandwidth for all three datasets
 %
 % CALCULATED NUMBERS:
 %     - Mean and standard deviation for centre frequeny [Hz]
@@ -41,22 +41,528 @@
 %     - Mean and standard deviation for bandwidth
 %
 % ABOUT:
-%     author:       - Morgan Roberts
-%     last update:  - 15/11/22
+%     author:      - Morgan Roberts
+%     last update: - 15/11/22
 
 close all
 clearvars
+warning('off')
 
 % ---------------------
 % Load data
 % ---------------------
 % change this to match the correct mapped drive location
-input_dir = 'Z:\open-UST-imaging-and-evaluation\transmit-bandwidth\';
+input_dir = 'Z:\open-UST-imaging-and-evaluation\transmit_impulse_response\';
+
+% filtering cutoff frequency
+cutoff_f = 5e6;
+
+% load the files
+input_filename = 'transmit_impulse_response_probe_q';
+[t_Q, mean_p_Q, f_Q, mean_as_Q] = processImpulseResponse(input_dir, input_filename, ...
+    cutoff_f, ExtraPlot=0, spectMode='db', dbThresh=-10, traceXlim='time_axis', traceYlim=[-Inf, Inf], spectXlim=[0, 5], spectYlim=[-40,2]);
+
+input_filename = 'transmit_impulse_response_probe_A22uH';
+[t_A22uH, mean_p_A22uH, f_A22uH, mean_as_A22uH] = processImpulseResponse(input_dir, input_filename, ...
+    cutoff_f, ExtraPlot=0, spectMode='db', dbThresh=-10, traceXlim='time_axis', traceYlim=[-Inf, Inf], spectXlim=[0, 5], spectYlim=[-40,2]);
+ 
+input_filename = 'transmit_impulse_response_probes_AEFG';
+[t_AEFG, mean_p_AEFG, f_AEFG, mean_as_AEFG] = processImpulseResponse(input_dir, input_filename, ...
+    cutoff_f, ExtraPlot=0, spectMode='db', dbThresh=-10, traceXlim='time_axis', traceYlim=[-Inf, Inf], spectXlim=[0, 5], spectYlim=[-40,2]);
+
+%% Compare the three datasets
+
+figure;
+subplot(2, 1, 1);
+hold on;
+plot(t_Q*1e6, mean_p_Q*1e-3)
+plot(t_AEFG*1e6, mean_p_AEFG*1e-3)
+plot(t_A22uH*1e6, mean_p_A22uH*1e-3)
+xlabel('Time [us]');
+ylabel('Pressure [kPa]');
+
+subplot(2, 1, 2);
+hold on;
+plot(f_Q*1e-6, mean_as_Q)
+plot(f_AEFG*1e-6, mean_as_AEFG)
+plot(f_A22uH*1e-6, mean_as_A22uH)
+xlim([0, 5])
+xlabel('Frequency [MHz]');
+ylabel('Amplitude [Pa]');
+legend({'No Matching (N=16)', 'Acoustic Matching Only (N=64)', 'Acoustic and Electrical Matching (N=16)'});
+
+% % Compare the matched and unmatched probes
+% figure;
+% f_qu       = linspace(0, 5e6, 1000);
+% matched    = interp1(f_AEFG, mean_as_AEFG, f_qu);
+% un_matched = interp1(f_Q, mean_as_Q, f_qu);
+
+function [time_axis, mean_p_trace, freqs, mean_p_spect] = processImpulseResponse(input_dir, input_filename, cutoff_f, options)
+%PROCESSIMPULSERESPONSE Manages the entire transmit impulse response processing workflow
+%
+% DESCRIPTION: processImpulseResponse accepts a single pressure dataset.
+%     First the datis filtered to remove the high frequency and DC content.
+%     Next, the x-position corresponding to the beam axis is located for
+%     everyelement. All other non-beam-axis traces are then discarded.
+%     Next, the waveforms are windowed, pre/post padded, and aligned in
+%     time. The amplitude spectra are then calculated using an FFT.
+%     Finally, everything is plotted, and relevant quantities are
+%     calculated.
+%
+% INPUTS:
+%     input_dir      - absolute path to the input data directory
+%     input_filename - file containing calibrated pressure traces
+%                      (without the .mat suffix)
+%     cutoff_f       - [numeric] lowpass cutoff frequency [Hz]
+%
+% OPTIONAL INPUTS:
+%     ExtraPlot      - [boolean] whether to produce extra plots showing
+%                      each of the processing stages
+%     spectMode      - [char] scale for the amplitude spectrum plots. Set
+%                      to 'db' for decibel and 'linear' for linear.
+%     dbThresh       - [numeric] threshold in dB for the fractional
+%                      bandwidth definition (should be negayive)
+%     traceXlim      - Xli
 
 
-function voltage_filt = filterTraces(voltage, dt, filter_param)
+arguments
+    input_dir
+    input_filename
+    cutoff_f
+    options.ExtraPlot = 0
+    options.spectMode = 'linear'
+    options.dbThresh = -6
+    options.traceXlim = 'time_axis';
+    options.traceYlim = [-Inf, Inf];
+    options.spectXlim = [0, cutoff_f * 1e-6];
+    options.spectYlim = [-Inf, Inf];
+end
 
+tic;
+disp('Loading pressure data ...');
+load([input_dir, input_filename, '.mat'], 'pressure', 'dt', 't0');
+disp(['Completed in ', num2str(toc), ' s']);
 
+Nt = size(pressure, 2);
+time_axis = t0 + (0:dt:(Nt - 1) * dt);
+
+if strcmp(options.traceXlim, 'time_axis')
+    options.traceXlim = time_axis([1, end]) * 1e6;
+end
+
+% pzt polarity correction
+switch input_filename
+    case 'transmit_impulse_response_probe_q'
+        pzt_polarity = logical([0,0,1,0,0,0,1,1,0,1,1,1,1,1,1,0]);
+    case 'transmit_impulse_response_probes_AEFG'
+        load('..\pzt_polarity.mat', 'pzt_polarity');
+        pzt_polarity = logical(pzt_polarity([1:16, 65:112]));
+    case 'transmit_impulse_response_probe_A22uH'
+        load('..\pzt_polarity.mat', 'pzt_polarity');
+        pzt_polarity = logical(pzt_polarity(1:16));
+end
+
+% correct for polarity differences
+pressure(:,:,pzt_polarity) = -pressure(:,:,pzt_polarity);
+
+% filter the input
+pressure_filt = filterTraces(pressure, dt, cutoff_f, Plot=options.ExtraPlot);
+
+% locate the x-position that is on the beam axis
+pressure_on_axis = locateBeamMax(pressure_filt, Plot=options.ExtraPlot);
+
+% align the pressure in time
+pressure_shift = alignInTime(pressure_on_axis, Plot=options.ExtraPlot);
+
+% compute amplitude spectrum
+[freqs, as, pressure_win] = computeSpect(pressure_shift, dt);
+
+% Display stats of centre freq, fractional bandwidth, amplitude at fc
+stats = computeStats(freqs, as, options.dbThresh);
+disp(input_filename);
+disp(stats);
+
+% plot mean and variation
+[time_axis, mean_p_trace, freqs, mean_p_spect, fig] = ... 
+    plotMeanAndVariation(freqs, as, time_axis, pressure_win, stats, ...
+    options.traceXlim, options.traceYlim, options.spectXlim, options.spectYlim, spectMode=options.spectMode);
+
+% Save figure
+set(gcf,'renderer','Painters');
+figure_filename = [pwd, '\figures\', input_filename];
+print(fig, figure_filename, '-depsc2');
+print(fig, figure_filename, '-dsvg');
+end
+
+function pressure_filt = filterTraces(pressure, dt, filter_param, options)
+% raw pressure data
+% remove DC
+% window
+% pre/post pad
+% apply filter
+arguments
+    pressure
+    dt
+    filter_param
+    options.Plot = 0 % whether to plot an example filtered signal
+end
+
+tic;
+disp('Filtering pressure data...');
+Npos          = size(pressure, 1);
+Nt            = size(pressure, 2);
+Ntx           = size(pressure, 3);
+pressure_filt = zeros(size(pressure));
+Fs            = 1 / dt;
+
+% Remove DC component of pressure
+pressure = removeDCOffset(pressure, 2);
+
+% Set the filter options
+filt_opts = {'LowPass', 'StopBandAtten', 80, 'TransitionWidth', 0.001, 'ZeroPhase', 1};
+
+% Create a window
+win = getWin(Nt, 'Tukey', 'Param', 0.1);
+
+% Create a paddng vector
+pad = zeros(Nt, 1);
+
+% plot an example filtered signal if required
+if options.Plot
+    trace = pressure(round(Npos/2),:,1);
+    
+    % window
+    trace = trace(:) .* win(:);
+
+    % pre/post pad to prevent zero-phase filter creating discontinuities
+    trace = [pad; trace; pad];
+
+    % apply the filter
+    filt_trace = applyFilter(trace, Fs, filter_param, filt_opts{:}, 'Plot', 1);
+
+    % remove the pre/post padding
+    filt_trace = filt_trace(Nt+1:end-Nt);
+    trace      = trace(Nt+1:end-Nt);
+
+    xlim([0, 10]);
+    figure;
+    hold on;
+    plot(trace, 'k')
+    plot(filt_trace, 'r')
+    xlabel('Time [samples]');
+    ylabel('Pressure [Pa]');
+    drawnow
+end
+
+% Lowpass filter each trace
+for idx = 1:Npos
+    for jdx = 1:Ntx
+        trace = pressure(idx,:,jdx);
+    
+        % window
+        trace = trace(:) .* win(:);
+    
+        % pre/post pad to prevent zero-phase filter creating discontinuities
+        trace_pad = [pad; trace; pad];
+        filt_trace = applyFilter(trace_pad, Fs, filter_param, filt_opts{:});
+
+        % remove the pre/post padding
+        filt_trace = filt_trace(Nt+1:end-Nt);
+
+        pressure_filt(idx,:,jdx) = filt_trace;
+    end
+end
+disp(['Completed in ', num2str(toc), ' s']);
+fprintf('\n');
 
 end
 
+function pressure_on_axis = locateBeamMax(pressure, options)
+arguments
+    pressure
+    options.Plot
+end
+
+% detect size of pressure input
+Ntx  = size(pressure, 3);
+Nt   = size(pressure, 2);
+Npos = size(pressure, 1);
+
+% compute pressure-squared-integral for every position
+sum_squared_p = squeeze(sum(pressure.^2, 2));
+
+% Find the beam axis position pos_ba
+pos_vec          = 1:Npos;
+pressure_on_axis = zeros(Nt, Ntx);
+for tdx = 1:Ntx
+    % Extract pressure-squared-integral for this transmitter
+    ssp = sum_squared_p(:,tdx);
+     
+    % Fit a quadratic of x-position vs pressure-squared-integral
+    [xData, yData] = prepareCurveData(pos_vec, ssp);
+    ft             = fittype('poly2');      % Set up quadratic fittype
+    fitresult      = fit(xData, yData, ft); % Fit model to data.
+    
+    % Find position where gradient of quadratic is 0
+    pos_ba = round(-fitresult.p2/(2*fitresult.p1)); 
+    
+    % if the gradient position
+    if pos_ba > Npos || pos_ba < 1
+        [~,pos_ba] = max(ssp);
+        warning(['Not possible to find zero-gradient position for tdx ', num2str(tdx)]);
+    end
+
+    % store the pressure on axis
+    pressure_on_axis(:,tdx) = pressure(pos_ba, :, tdx);
+
+    % Plot the position location result for element 1 if required
+    if options.Plot && tdx == 1
+        figure;
+        subplot(1, 2, 1);
+        plot(pos_vec, ssp);
+        hold on;
+        plot( fitresult, xData, yData);
+        xline(pos_ba, 'k', 'linewidth', 2);
+        xlabel('x-position [samples]');
+        ylabel('Pressure Squared Integral')
+
+        subplot(1, 2, 2);
+        imagesc(squeeze(pressure(:,:,tdx)));
+        yline(pos_ba, 'k', 'linewidth', 2);
+        ylabel('x-position [samples]');
+        xlabel('Time [samples]');
+        drawnow
+    end
+
+end
+end
+
+function pressure_shift = alignInTime(pressure, options)
+arguments
+    pressure
+    options.Plot
+end
+
+% detect size of pressure input
+Ntx = size(pressure, 2);
+
+master_p  = pressure(:,1);
+pressure_shift = zeros(size(pressure));
+
+for tdx = 1:Ntx
+    % compute cross correlation
+    [r,lags] = xcorr(pressure(:,tdx), master_p);
+    
+    % find lag that gives best alignment
+    [~,lagI] = max(r);
+    lag      = lags(lagI);
+    
+    % shift trace
+    pressure_shift(:,tdx) = circshift(pressure(:,tdx), -lag);
+end
+
+if options.Plot
+    figure;
+    plot(pressure_shift);
+    xlabel('Time [samples]');
+    ylabel('Pressure [Pa]');
+end
+end
+
+function [freqs, as, pressure_win] = computeSpect(pressure, dt)
+
+% detect size of pressure input
+Ntx = size(pressure, 2);
+Nt = size(pressure, 1);
+
+Fs = 1 / dt;
+
+win          = getWin(Nt, 'Tukey', 'Param', 0.05);
+win          = repmat(win, [1, Ntx]);
+pressure_win = win .* pressure;
+
+[freqs, as] = spect(pressure_win, Fs, 'FFTLength', Nt*20, 'Dim', 1);
+end
+
+function [time_axis, mean_p_trace, freqs, mean_p_spect, fig] = plotMeanAndVariation(freqs, as, time_axis, pressure, stats, traceXlim, traceYlim, spectXlim, spectYlim, options)
+
+arguments
+    freqs
+    as
+    time_axis
+    pressure
+    stats
+    traceXlim
+    traceYlim
+    spectXlim
+    spectYlim   
+    options.spectMode = 'linear'
+end
+
+Nt = size(pressure, 1);
+Nf = length(freqs);
+
+% storage vectors for 0/0.5/1 quantiles
+pressure_quant  = zeros(Nt, 3);
+amplitude_quant = zeros(Nf, 3);
+
+mean_p_trace = mean(pressure, 2);
+mean_p_spect = mean(as, 2);
+
+% quantiles definitions (entire range and median)
+quant = [0, 0.5, 1];
+for fdx = 1:Nf
+    amplitude_quant(fdx,:) = quantile(as(fdx,:), quant);
+end
+for tdx = 1:Nt
+    pressure_quant(tdx,:) = quantile(pressure(tdx,:), quant);
+end
+
+f_fill        = [freqs(:)', flip(freqs(:)')];
+t_fill        = [time_axis(:)', flip(time_axis(:)')];
+pressure_fill = [pressure_quant(:,3)', flip(pressure_quant(:,1)')];
+as_fill       = [amplitude_quant(:,3)', flip(amplitude_quant(:,1)')];
+
+fill_col = [175, 238, 238]/255;
+
+% Create figure with specified handle
+fig = figure;
+% Time domain plot ------------------------------
+subplot(2, 1, 1);
+hold on
+
+% plot mean pressure trace
+h1 = plot(1e6*time_axis, mean_p_trace*1e-3, 'k-', 'linewidth', 2);
+% plot entire range of measured data
+h2 = fill(1e6*t_fill, 1e-3*pressure_fill, fill_col);
+set(h2, 'EdgeColor','none');
+uistack(h2,'bottom');
+
+xlabel('Time [\mus]');
+ylabel('Pressure [kPa]');
+title('Impulse Response');
+
+set(gca,'Box','on');
+set(gca, 'Layer', 'Top')
+
+ylim(traceYlim)
+xlim(traceXlim);   
+
+legend([h1, h2], {'Mean', 'Measured Variation'});
+
+
+% Frequency domain plot ------------------------------
+
+% if required, change amplitude data to db, instead if linear
+if strcmp(options.spectMode, 'db')
+    ref_val           = max(mean_p_spect); % this may need to be an input argument later
+    mean_p_spect      = 20 * log10(mean_p_spect / ref_val);
+    as_fill           = 20 * log10(as_fill / ref_val);
+    stats.mean.y_low  = 20 * log10(stats.mean.y_low / ref_val);
+    stats.mean.y_high = 20 * log10(stats.mean.y_high / ref_val);
+end
+
+subplot(2, 1, 2);
+hold on
+
+% plot mean pressure amplitude spectrum
+plot(freqs*1e-6, mean_p_spect, 'k-', 'linewidth', 2);
+
+% plot entire range of measured data
+h2 = fill(1e-6*f_fill, as_fill, fill_col);
+set(h2, 'EdgeColor','none');
+uistack(h2,'bottom');
+
+% plot resonance and fractional bandwidth
+h5 = xline(stats.mean_fc*1e-6, 'k--');
+h6 = plot(1e-6*[stats.mean.x_low, stats.mean.x_high], ...
+          [stats.mean.y_low, stats.mean.y_high], ...
+          'r-', 'marker', '.', 'markersize', 12);
+
+if strcmp(options.spectMode, 'db')
+    yline(0, 'k--');
+end
+
+xlabel('Frequency [MHz]');
+ylabel('Pressure [Pa]');
+title('Amplitude Spectrum');
+
+set(gca,'Box','on');
+set(gca, 'Layer', 'Top');
+
+xlim(spectXlim);
+ylim(spectYlim);
+
+legend([h5, h6], {['Mean transducer resonance', newline, ...
+    'frequency f_0 = ', num2str(stats.mean_fc*1e-6, 3), ' MHz'], ...
+    [num2str(stats.dbThresh), ' dB Fractional Bandwidth: ', num2str(stats.mean_FBW, 2), ' %']})
+
+end
+
+function stats = computeStats(freqs, as, dbThresh)
+
+% extract centre freq (with maximum amplitude) for each transmitter ------
+[~,I]   = max(as, [], 1);
+fc      = freqs(I);
+mean_fc = mean(fc);
+std_fc  = std(fc);
+
+% extract amplitude distribution at mean centre freq----------------------
+[fc_cl, I] = findClosest(freqs, mean_fc);
+warning(['Actual centre frequency is different from mean_fc by ', num2str(abs(fc_cl-mean_fc)), ' Hz.'])
+Afc      = as(I,:);
+mean_Afc = mean(Afc);
+std_Afc  = std(Afc);
+
+% Compute fractional bandwidth distribution -----------------------------
+Ntx      = size(as, 2);
+FBW      = zeros(1, Ntx);
+
+for idx = 1:Ntx
+    as_spect     = as(:,idx);
+    [~,I]        = max(as_spect);
+    fc           = freqs(I);
+    thresh       = max(as_spect) * 10^(dbThresh/20);
+    state_change = diff(as_spect > thresh);
+    i_low        = find(state_change(1:I), 1, 'last') + 1;
+    i_high       = find(state_change(I+1:end), 1, 'first') + I;
+    x_low        = freqs(i_low);
+    x_high       = freqs(i_high);
+    FBW(idx)     = 1e2 * (x_high - x_low) / fc;
+end
+
+% repeat for the mean trace to find the points to plot
+as_mean = mean(as, 2);
+[~,I]   = max(as_mean);
+thresh  = max(as_mean) * 10^(dbThresh/20);
+
+% Find where spectrum falls below threshold either side of fc (if it rises
+% above threshold again in different frequency range, this is ignored)
+state_change = diff(as_mean > thresh);
+i_low        = find(state_change(1:I), 1, 'last') + 1;
+i_high       = find(state_change(I+1:end), 1, 'first') + I;
+
+% Extract coordinates
+y_low  = as_mean(i_low);
+y_high = as_mean(i_high);
+x_low  = freqs(i_low);
+x_high = freqs(i_high);
+
+mean_FBW = mean(FBW);
+std_FBW  = std(FBW);
+
+% Store statistics ------------------------------------------------------
+stats.dbThresh    = dbThresh;
+stats.mean_fc     = mean_fc;
+stats.std_fc      = std_fc;
+stats.mean_FBW    = mean_FBW;
+stats.std_FBW     = std_FBW;
+stats.mean_Afc    = mean_Afc;
+stats.std_Afc     = std_Afc;
+stats.std_Afc_pc  = 1e2 * std_Afc / mean_Afc;
+stats.mean.x_low  = x_low;
+stats.mean.x_high = x_high;
+stats.mean.y_low  = y_low;
+stats.mean.y_high = y_high;
+
+end
