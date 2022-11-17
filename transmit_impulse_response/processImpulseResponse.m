@@ -78,13 +78,13 @@ end
 % apply pzt polarity correction depending on filename
 switch input_filename
     case 'transmit_impulse_response_probe_q'
-        pzt_polarity = logical([0,0,1,0,0,0,1,1,0,1,1,1,1,1,1,0]);
+        pzt_polarity = -logical([0,0,1,0,0,0,1,1,0,1,1,1,1,1,1,0]);
     case 'transmit_impulse_response_probes_AEFG'
         load('..\pzt_polarity.mat', 'pzt_polarity');
-        pzt_polarity = logical(pzt_polarity([1:16, 65:112]));
+        pzt_polarity = -logical(pzt_polarity([1:16, 65:112]));
     case 'transmit_impulse_response_probe_A22uH'
         load('..\pzt_polarity.mat', 'pzt_polarity');
-        pzt_polarity = logical(pzt_polarity(1:16));
+        pzt_polarity = -logical(pzt_polarity(1:16));
 end
 
 % correct for polarity differences
