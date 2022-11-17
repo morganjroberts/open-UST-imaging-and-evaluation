@@ -9,7 +9,7 @@
 %     simultaneous-algebraic-reconstruction-technique (SART).
 %
 % INPUT DATA DIRECTORY:
-%     Datasets\open-UST-imaging-and-evaluation\image_reconstruction\dataset1
+%     Datasets\open-UST-imaging-and-evaluation\UST_dataset1
 %
 % INPUT DATA FILENAMES:
 %     <input-data-dir>\delta_tof_phantom.mat               time-of-flight picked data from a UST experiment
@@ -30,7 +30,7 @@ close all
 clearvars
 
 % make sure the data_dir is correct. Current folder should be the repo_dir
-data_dir = 'Z:\open-UST-imaging-and-evaluation\image_reconstruction\dataset1\';
+data_dir = 'Z:\open-UST-imaging-and-evaluation\UST_dataset1\';
 load([data_dir, 'delta_tof_phantom.mat'], 'delta_tof');
 load('..\calibration\ideal_element_positions.mat', 'element_positions');
 
