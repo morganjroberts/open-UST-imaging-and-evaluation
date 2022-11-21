@@ -17,10 +17,10 @@
 %     <data-dir>\transmit_impulse_response\transmit_impulse_response_probes_A22uH.mat   module A driven thorugh electrical impedance matching inductors
 %
 % EXPERIMENTAL PARAMETERS:
-%     <repo-dir>\transmit_impulse_response\transmit_impulse_response_experimental_parameters.md (cd to local git repo first)
+%     <repo-dir>\transmit_impulse_response\transmit_impulse_response_experimental_parameters.md
 %
 % FIGURE OUTPUT DIRECTORY:
-%     <repo-dir>\transmit_impulse_response\figures (cd to local git repo first)
+%     <repo-dir>\transmit_impulse_response\figures
 %
 % CALCULATED NUMBERS:
 %     - Mean and standard deviation for centre frequeny [Hz]

@@ -32,7 +32,7 @@ for mdx = 1:Nmod
    
     % save positions
     i_start = ((mdx - 1) * N_per_mod) + 1;
-    i_end = i_start + N_per_mod - 1;
+    i_end   = i_start + N_per_mod - 1;
     element_positions(i_start:i_end, :) = [mod_x_new, mod_y_new];
 end
 
@@ -76,5 +76,5 @@ axis image
 set(gcf, 'position', [581, 576, 1180, 423]);
 
 
-save('256_element_UST_array_predicted_positions.mat', ...
+save('ideal_element_positions.mat', ...
     'element_positions', 'distance_matrix', 'angle_to_norm_matrix');
