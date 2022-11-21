@@ -99,7 +99,6 @@ legend([h1, h2], {'Mean', 'Measured Variation'});
 
 
 % Frequency domain plot ---------------------------------------------------
-
 % if required, change amplitude data to db, instead if linear
 if strcmp(spectMode, 'db')
     ref_val           = max(mean_p_spect); % this may need to be an input argument later
@@ -107,6 +106,7 @@ if strcmp(spectMode, 'db')
     as_fill           = 20 * log10(as_fill / ref_val);
     stats.mean.y_low  = 20 * log10(stats.mean.y_low / ref_val);
     stats.mean.y_high = 20 * log10(stats.mean.y_high / ref_val);
+    as_fill(isinf(as_fill)) = -80; % catch for values of as_fill that are zero, (-Inf in db)
 end
 
 subplot(2, 1, 2);

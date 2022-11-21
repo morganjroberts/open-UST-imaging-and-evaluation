@@ -13,6 +13,9 @@
 % OUTPUT DIRECTORY:
 %     <repo-dir>\phantom_design
 %
+% OUTPUT FIGURE DIRECTORY:
+%     <repo-dir>\figures\phantom_design
+%
 % DEPENDENCIES:
 %     k-Wave   https://github.com/ucl-bug/k-wave
 %
@@ -75,7 +78,7 @@ axis image
 
 % Save figure
 set(fig,'renderer','Painters');
-figure_filename = [pwd, '\phantom_true_sound_speed'];
+figure_filename = [pwd, filesep, 'figures', filesep, 'phantom_true_sound_speed'];
 print(fig, figure_filename, '-depsc2');
 print(fig, figure_filename, '-dsvg');
 

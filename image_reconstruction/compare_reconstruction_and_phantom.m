@@ -26,7 +26,8 @@ sart = obj;
 clear obj
 
 % Load the phantom sound speed map
-load('..\phantom_design\phantom_true_sound_speed.mat', 'phantom');
+repo_dir = getRepoDataPath;
+load([repo_dir, filesep, 'phantom_design', filesep, 'phantom_true_sound_speed.mat'], 'phantom');
 
 % Common scale limits for sound speed
 cRange = [1420, 1580];

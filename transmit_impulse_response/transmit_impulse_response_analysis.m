@@ -11,19 +11,16 @@
 %     amplitude spectra are then calculated using an FFT. Finally,
 %     everything is plotted, and relevant quantities are calculated.
 %
-% INPUT DATA DIRECTORY:
-%     Datasets\open-UST-imaging-and-evaluation\transmit_impulse_response
-%
 % INPUT DATA FILENAMES:
-%     transmit_impulse_response_probe_q.mat        module Q (without acoustic matching layers)
-%     transmit_impulse_response_probes_AEFG.mat    modules A, E, F and G (with acoustic matching layers)
-%     transmit_impulse_response_probes_A22uH.mat   module A driven thorugh electrical impedance matching inductors
+%     <data-dir>\transmit_impulse_response\transmit_impulse_response_probe_q.mat        module Q (without acoustic matching layers)
+%     <data-dir>\transmit_impulse_response\transmit_impulse_response_probes_AEFG.mat    modules A, E, F and G (with acoustic matching layers)
+%     <data-dir>\transmit_impulse_response\transmit_impulse_response_probes_A22uH.mat   module A driven thorugh electrical impedance matching inductors
 %
 % EXPERIMENTAL PARAMETERS:
-%     \transmit_impulse_response\transmit_impulse_response_experimental_parameters.md (cd to local git repo first)
+%     <repo-dir>\transmit_impulse_response\transmit_impulse_response_experimental_parameters.md (cd to local git repo first)
 %
 % FIGURE OUTPUT DIRECTORY:
-%     \transmit_impulse_response\figures (cd to local git repo first)
+%     <repo-dir>\transmit_impulse_response\figures (cd to local git repo first)
 %
 % CALCULATED NUMBERS:
 %     - Mean and standard deviation for centre frequeny [Hz]
@@ -37,12 +34,13 @@
 close all
 clearvars
 warning('off')
+[~, data_dir] = getRepoDataPath;
 
 % ---------------------
 % Load data
 % ---------------------
 % change this to match the correct mapped drive location
-input_dir = 'Z:\open-UST-imaging-and-evaluation\transmit_impulse_response\';
+input_dir = [data_dir, filesep, 'transmit_impulse_response', filesep];
 
 % filtering cutoff frequency
 cutoff_f = 5e6;
@@ -52,13 +50,13 @@ cutoff_f = 5e6;
 % [t_Q, mean_p_Q, f_Q, mean_as_Q] = processImpulseResponse(input_dir, input_filename, ...
 %     cutoff_f, ExtraPlot=1, spectMode='db', dbThresh=-10, traceXlim='time_axis', traceYlim=[-Inf, Inf], spectXlim=[0, 5], spectYlim=[-40,2]);
 
-% input_filename = 'transmit_impulse_response_probe_A22uH';
-% [t_A22uH, mean_p_A22uH, f_A22uH, mean_as_A22uH] = processImpulseResponse(input_dir, input_filename, ...
-%     cutoff_f, ExtraPlot=0, spectMode='db', dbThresh=-10, traceXlim='time_axis', traceYlim=[-Inf, Inf], spectXlim=[0, 5], spectYlim=[-40,2]);
+input_filename = 'transmit_impulse_response_probe_A22uH';
+[t_A22uH, mean_p_A22uH, f_A22uH, mean_as_A22uH] = processImpulseResponse(input_dir, input_filename, ...
+    cutoff_f, ExtraPlot=1, spectMode='db', dbThresh=-10, traceXlim='time_axis', traceYlim=[-Inf, Inf], spectXlim=[0, 5], spectYlim=[-40,2]);
 %  
-input_filename = 'transmit_impulse_response_probes_AEFG';
-[t_AEFG, mean_p_AEFG, f_AEFG, mean_as_AEFG] = processImpulseResponse(input_dir, input_filename, ...
-    cutoff_f, ExtraPlot=0, spectMode='db', dbThresh=-10, traceXlim='time_axis', traceYlim=[-Inf, Inf], spectXlim=[0.4, 5], spectYlim=[-40,2]);
+% input_filename = 'transmit_impulse_response_probes_AEFG';
+% [t_AEFG, mean_p_AEFG, f_AEFG, mean_as_AEFG] = processImpulseResponse(input_dir, input_filename, ...
+%     cutoff_f, ExtraPlot=0, spectMode='db', dbThresh=-10, traceXlim='time_axis', traceYlim=[-Inf, Inf], spectXlim=[0.4, 5], spectYlim=[-40,2]);
 
 %% Compare the three datasets
 

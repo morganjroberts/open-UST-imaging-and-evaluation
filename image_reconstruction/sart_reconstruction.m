@@ -8,11 +8,8 @@
 %     distribution in the phantom is reconstructed using straight ray
 %     simultaneous-algebraic-reconstruction-technique (SART).
 %
-% INPUT DATA DIRECTORY:
-%     Datasets\open-UST-imaging-and-evaluation\UST_dataset1
-%
 % INPUT DATA FILENAMES:
-%     <input-data-dir>\delta_tof_phantom.mat               time-of-flight picked data from a UST experiment
+%     <data-dir>\UST_dataset1\delta_tof_phantom.mat               time-of-flight picked data from a UST experiment
 %     <repo-dir>\calibration\ideal_element_positions.mat   ideal cartesian element positions (X, Y)
 %     
 % FIGURE OUTPUT DIRECTORY:
@@ -30,9 +27,10 @@ close all
 clearvars
 
 % make sure the data_dir is correct. Current folder should be the repo_dir
-data_dir = 'Z:\open-UST-imaging-and-evaluation\UST_dataset1\';
-load([data_dir, 'delta_tof_phantom.mat'], 'delta_tof');
-load('..\calibration\ideal_element_positions.mat', 'element_positions');
+[repo_dir, data_dir] = getRepoDataPath;
+dataset = [data_dir, filesep, 'UST_dataset1'];
+load([dataset, filesep, 'delta_tof_phantom.mat'], 'delta_tof');
+load([repo_dir, filesep, 'calibration', filesep, 'ideal_element_positions.mat'], 'element_positions');
 
 % apply a 3x3 2D median filter to the input data to remove noise
 filt_delta_tof = medfilt2(delta_tof);
