@@ -97,7 +97,6 @@ xlim(traceXlim);
 
 legend([h1, h2], {'Mean', 'Measured Variation'});
 
-
 % Frequency domain plot ---------------------------------------------------
 % if required, change amplitude data to db, instead if linear
 if strcmp(spectMode, 'db')
