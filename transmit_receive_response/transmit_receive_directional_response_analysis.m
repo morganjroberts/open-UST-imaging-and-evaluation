@@ -146,14 +146,14 @@ title('Std f_c');
 % deviation of the recieve amplitude at the centre frequency.
 fig1 = figure;
 subplot(1, 2, 1);
-h = imagesc(bins, bins, mean_Afc/max(mean_Afc(:)));
+h = imagesc(bins, bins, 20*log10(mean_Afc/max(mean_Afc(:))));
 axis image;
 c = colorbar;
 colormap(getBatlow());
 ylabel('Emission [deg]');
 xlabel('Incidence [deg]');
 set(h, 'AlphaData', ~isnan(mean_Afc));
-ylabel(c, 'Mean Amplitude [au]')
+ylabel(c, 'Mean Amplitude [dB]')
 xlim(bins([1, end]));
 ylim(bins([1, end]));
 

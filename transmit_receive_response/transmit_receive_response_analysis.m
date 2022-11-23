@@ -1,13 +1,8 @@
 % FILENAME:
-%      transmit_receive_on_axis_response_analysis.m
+%      transmit_receive_response_analysis.m
 %
 % DESCRIPTION:
-%     Code for analysing the watershot receive data from the open-UST
-%     transducer ring array. For every transmitter-receiver pair, an
-%     amlitude spectrum of the trace is calculated, and the centre
-%     frequency, bandwidth, and amplitude-at-centre freq are calculated.
-%     Then, the effect of interelement variation, and directional response,
-%     on these quantities are assess.
+%     previous version that uses different angular binning approach
 %
 % NOTE:
 %     This script doesn't use the raw receive data - this should have
@@ -92,7 +87,6 @@ for bdx = 1:Nbin
     i_start = find(sum(g_data, 1), 1, 'first') - 10;
     i_end   = find(sum(g_data, 1), 1, 'last') + 10;
 
-
     Nf = length(freqs);
 
     dbThresh = -10;
@@ -162,121 +156,3 @@ ylim([0, B+0.5]);
 xlim([0, Inf])
 set(gca, 'YDir', 'reverse')
 xlabel('Amplitude at fc');
-
-
-function [g_data_aligned, g_data] = groupSimilarSignals(data, mask, options)
-
-arguments
-    data
-    mask
-    options.Normalise     = false;
-    options.RestrictXcorr = 12;
-    options.ExtraPlot     = true
-end
-
-if sum(mask) < 1
-    g_data_aligned = 0;
-    g_data = 0;
-    return
-end
-
-% Compute sizes of array
-Ntdx    = size(data, 1);
-Nrdx    = size(data, 2);
-Nt      = size(data, 3);
-
-% Reshape the data since original tx/rx info no longer important
-data  = reshape(data, [Ntdx * Nrdx, Nt]);
-mask  = reshape(mask, [Ntdx * Nrdx, 1]);
-
-% extract the grouped data
-g_data = squeeze(data(mask, :));
-
-% align the grouped data
-g_data_aligned = zeros(size(g_data));
-
-N = size(g_data, 1);
-
-master = g_data(1, :);
-tic;
-disp('Grouping similar signals ...');
-for idx = 1:N
-    % Make copy of the current trace
-    trace = squeeze(g_data(idx,:));
-
-    if options.Normalise
-        trace = trace / max(trace);
-    end
-
-    % Compute cross correlation
-    [r, lags] = xcorr(master, trace);
-
-    % Modify the cross correltaion result to exclude lag positions outside
-    % of expected range (estimated from the delay between first-motion of each)
-    del     = find(master, 1, 'first') - find(trace, 1, 'first');
-    lag_min = del - options.RestrictXcorr;
-    lag_max = del + options.RestrictXcorr;    
-    r(1:find(lags == lag_min) - 1)     = 0;
-    r(find(lags == lag_max) + 1 : end) = 0;
-
-    % Find the best alignment and store
-    [~,I] = max(r);
-    lag   = lags(I);
-    g_data_aligned(idx, :) = circshift(trace, lag);
-    
-end
-disp(['Completed in ', num2str(toc),  's']);
-fprintf('\n');
-
-if options.ExtraPlot
-    i_start = find(sum(g_data, 1), 1, 'first') - 10;
-    i_end   = find(sum(g_data, 1), 1, 'last') + 10;
-
-    figure;
-    subplot(2, 1, 1);
-    plot(g_data')
-    title('Original')
-    xlim([i_start, i_end]);
-    xlabel('Time [samples]');
-    ylabel('Voltage [au]');
-    
-    subplot(2, 1, 2);
-    plot(g_data_aligned')
-    title('Aligned')
-    xlim([i_start, i_end]);
-    xlabel('Time [samples]');
-    ylabel('Voltage [au]');
-    drawnow
-end
-
-
-
-end
-
-
-%%
-
-%
-
-% Compute the amplitude spectra
-
-% 
-% fa_data = fa_data(mask(:),:);
-% 
-% [f, as] = spect(fa_data, Fs, 'Dim', 2);
-% figure;
-% plot(fa_data')
-% 
-% 
-% axis_angle = angle_TxNorm_to_RxNorm(:);
-
-
-
-% group pulses into angle-bins
-
-% for the on-axis bin, look at time shifting - if it's not good enough,
-% align in time e.g. xcorr, work out distribution of lags
-
-% plot on-axis time and amplitude spect
-
-% plot angle vs amplitude spect
