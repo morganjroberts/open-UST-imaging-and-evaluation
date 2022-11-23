@@ -109,7 +109,7 @@ for btx = 1:Nbin
         end
 
         % Extract the receive data traces in this angular bin combination
-        g_data = groupSimilarSignals(fa_data, tr_mask, RestrictXcorr=6, ExtraPlot=false);
+        g_data = groupSimilarSignals(fa_data, tr_mask, Align=true, RestrictXcorr=6, ExtraPlot=false);
 
         % Calculate the amplitude spectra for each receive data trace
         [freqs, as] = spect(g_data, Fs, 'Dim', 2, 'FFTLength', size(g_data, 2) * 6);
@@ -172,6 +172,6 @@ ylim(bins([1, end]));
 set(fig1, 'Position', [680 817 817 281]);
 
 set(fig1,'renderer','Painters');
-figure_filename = [repo_dir, filesep, 'transmit_receive_response', filesep, 'figures', filesep, 'directional_response_mean_std'];
+figure_filename = [repo_dir, filesep, 'transmit_receive_response', filesep, 'figures', filesep, 'tx_rx_directional_response_mean_std'];
 print(fig1, figure_filename, '-depsc2');
 print(fig1, figure_filename, '-dsvg');

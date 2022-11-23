@@ -1,5 +1,5 @@
 % FILENAME:
-%      transmit_receive_response_analysis.m
+%      transmit_receive_on_axis_response_analysis.m
 %
 % DESCRIPTION:
 %     Code for analysing the watershot receive data from the open-UST
