@@ -40,6 +40,8 @@ colorbar;
 colormap(getBatlow)
 axis image
 
+% zero-phase filter and window traces in time
+% window in space
 % decide whether cutting is necessary
 
 % DO THIS FOR ALL THREE AT ONCE? plane must be in same place
@@ -47,7 +49,15 @@ axis image
 % only - select the best source plane
 
 % stage 2, backproject entire time series to just the source plane
-% save the pressure volume
+% save the pressure volumes
+
+% stage 3 locate and isolate (window) the sources. Save
+
+% stage 4 re-project to 5(?) planes and save
+
+% stage 5 compute beamwidth, opening angle, skew, save
+
+% stage 6 visualise stats
 
 
 function pressure_filt = filterFieldScanTraces(pressure, dt, filter_param, options)
