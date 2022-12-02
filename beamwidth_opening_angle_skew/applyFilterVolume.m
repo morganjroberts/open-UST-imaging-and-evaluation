@@ -8,7 +8,9 @@ function pressure_filt = applyFilterVolume(pressure, dt, filter_param, dim, opti
 %      temporal sampling frequency. The DC component is also removed.
 %      Padding and windowing is used to prevent the zero-phase filter from
 %      producing discontinuities. If required, the unfiltered/filtered
-%      signals can be plotted. Nt: number of time samples.
+%      signals can be plotted. Nt: number of time samples. The signal can
+%      be optionally windowed before padding and filtering. If RemovePad is
+%      true, the filtered signal is always windowed after removing padding.
 %
 % INPUTS:
 %     pressure      - [numeric] input pressure array, must have dims: 3 [Pa]
@@ -29,6 +31,7 @@ function pressure_filt = applyFilterVolume(pressure, dt, filter_param, dim, opti
 %     PadLength     - [numeric] length of the pre and post padding regions
 %                     as an integer multiple of Nt. The padded signal
 %                     length is (2 * PadLength + 1) * Nt
+%     PreWindow     - [boolean] whether to window the signal before padding
 %
 % OUTPUTS:
 %     pressure_filt - [numeric] filtered pressure array [Pa]
@@ -45,6 +48,7 @@ arguments
     options.ExtraPlot      = 0;
     options.RemovePad = 1;
     options.PadLength = 2;
+    options.PreWindow = true;
 end
 
 tic;
@@ -95,9 +99,12 @@ for adx = 1:Na
     for bdx = 1:Nb
         % Extract trace
         trace = squeeze(pressure(:, adx, bdx));
+        trace = trace(:);
     
         % Apply window
-        trace = trace(:) .* win(:);
+        if options.PreWindow
+            trace = trace .* win(:);
+        end
     
         % Pre/post pad to prevent zero-phase filter creating discontinuities
         trace_pad  = [pad; trace; pad];
