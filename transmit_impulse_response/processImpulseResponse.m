@@ -94,21 +94,27 @@ end
 pressure(:,:,pzt_polarity) = -pressure(:,:,pzt_polarity);
 
 % filter the input
-pressure_filt = filterTraces(pressure, dt, cutoff_f, Plot=options.ExtraPlot);
+% pressure_filt = filterTraces(pressure, dt, cutoff_f, Plot=options.ExtraPlot);
+pad_len = 2;
+pressure_filt = applyFilterVolume(pressure, dt, cutoff_f, 2, ExtraPlot=options.ExtraPlot, RemovePad=false, PadLength=pad_len);
 
 % locate the x-position that is on the beam axis
 pressure_on_axis = locateBeamAxis(pressure_filt, Plot=options.ExtraPlot);
 
 % align the pressure in time
-[pressure_shift_pad, pressure_shift] = alignInTime(pressure_on_axis, Plot=options.ExtraPlot);
+pressure_shift = alignInTime(pressure_on_axis, Plot=options.ExtraPlot);
 
 % compute amplitude spectrum
-[freqs, as] = computeSpect(pressure_shift_pad, dt);
+Fs          = 1 / dt;
+[freqs, as] = spect(pressure_shift, Fs, 'FFTLength', Nt*6, 'Dim', 1);
 
 % Display stats of centre freq, fractional bandwidth, amplitude at fc
 stats = computeStats(freqs, as, options.dbThresh);
 disp(input_filename);
 disp(stats);
+
+% Remove padding introduced by applyFilterVolume
+pressure_shift = pressure_shift((Nt * pad_len) + 1 : end - (Nt * pad_len), : );
 
 % plot pressure-time and amplitude-frequency with mean and variation
 [mean_p_trace, mean_p_spect, fig] = ... 

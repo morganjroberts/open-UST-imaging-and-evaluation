@@ -17,9 +17,10 @@ scan_data_folder = [data_dir, filesep, 'field_scans'];
 filename         = 'field_scan_probe_A_all_channels';
 load([scan_data_folder, filesep, filename, '.mat']);
 
-%%
-pressure = filterFieldScanTraces(pressure, dt, 5e6, ExtraPlot=true);
+% Low-pass filter and window the measured traces
+pressure = applyFilterVolume(pressure, dt, 5e6, 3, RemovePad=true, PadLength=2, ExtraPlot=true);
 
+%%
 % data = squeeze( pressure(round(Ny/2), round(Nx/2), :) );
 % figure;
 % plot(  data);

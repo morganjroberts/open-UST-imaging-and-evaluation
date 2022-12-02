@@ -46,13 +46,13 @@ input_dir = [data_dir, filesep, 'transmit_impulse_response', filesep];
 cutoff_f = 5e6;
 
 % load the files and process the data
-% input_filename = 'transmit_impulse_response_probe_q';
-% [t_Q, mean_p_Q, f_Q, mean_as_Q] = processImpulseResponse(input_dir, input_filename, ...
-%     cutoff_f, ExtraPlot=1, spectMode='db', dbThresh=-10, traceXlim='time_axis', traceYlim=[-Inf, Inf], spectXlim=[0, 5], spectYlim=[-40,2]);
-
-input_filename = 'transmit_impulse_response_probe_A22uH';
-[t_A22uH, mean_p_A22uH, f_A22uH, mean_as_A22uH] = processImpulseResponse(input_dir, input_filename, ...
+input_filename = 'transmit_impulse_response_probe_q';
+[t_Q, mean_p_Q, f_Q, mean_as_Q] = processImpulseResponse(input_dir, input_filename, ...
     cutoff_f, ExtraPlot=1, spectMode='db', dbThresh=-10, traceXlim='time_axis', traceYlim=[-Inf, Inf], spectXlim=[0, 5], spectYlim=[-40,2]);
+
+% input_filename = 'transmit_impulse_response_probe_A22uH';
+% [t_A22uH, mean_p_A22uH, f_A22uH, mean_as_A22uH] = processImpulseResponse(input_dir, input_filename, ...
+%     cutoff_f, ExtraPlot=1, spectMode='db', dbThresh=-10, traceXlim='time_axis', traceYlim=[-Inf, Inf], spectXlim=[0, 5], spectYlim=[-40,2]);
 %  
 % input_filename = 'transmit_impulse_response_probes_AEFG';
 % [t_AEFG, mean_p_AEFG, f_AEFG, mean_as_AEFG] = processImpulseResponse(input_dir, input_filename, ...
