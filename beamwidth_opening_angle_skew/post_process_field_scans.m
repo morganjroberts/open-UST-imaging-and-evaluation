@@ -7,11 +7,12 @@
 %     transducer face and hydrophone tip. Windowing is used to smooth this
 %     transition. Windowing is also applied in both spatial dimensions at
 %     every time step to prepare for the FFTs during backpropagation.
-%     Finally, the time series are filtered to remove high frequency
-%     content not supported by the spatial grid step size. To save the
-%     data, the input data file is copied, and the pressure, time_axis, and
-%     Nt variables are overwritten with their post-processed versions. All
-%     other variables are kept the same.
+%     Next, the time series are filtered to remove high frequency
+%     content not supported by the spatial grid step size. Finally, the
+%     time series are post-padded. To save the data, the input data file is
+%     copied, and the pressure, time_axis, and Nt variables are overwritten
+%     with their post-processed versions. All other variables are kept the
+%     same.
 %
 % INPUT DATA FILENAMES:
 %     <data-dir>\field_scans\_______.mat      
@@ -58,10 +59,10 @@ plotMeasurementPlane(pressure, x_pos, y_pos)
 % Now, perform the post processing for all files
 
 filename = 'field_scan_probe_A_all_channels';
-postprocessFieldScan(scan_data_folder, filename, t_cut, border, cutoff_f, TukeyParam=tukey_param)
+postprocessFieldScan(scan_data_folder, filename, t_cut, border, cutoff_f, TukeyParam=tukey_param, PostPadFactor=1)
 
 filename = 'field_scan_probe_E_all_channels';
-postprocessFieldScan(scan_data_folder, filename, t_cut, border, cutoff_f, TukeyParam=tukey_param)
+postprocessFieldScan(scan_data_folder, filename, t_cut, border, cutoff_f, TukeyParam=tukey_param, PostPadFactor=1)
 
 filename = 'field_scan_probe_F_all_channels';
-postprocessFieldScan(scan_data_folder, filename, t_cut, border, cutoff_f, TukeyParam=tukey_param)
+postprocessFieldScan(scan_data_folder, filename, t_cut, border, cutoff_f, TukeyParam=tukey_param, PostPadFactor=1)

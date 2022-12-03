@@ -36,7 +36,7 @@ scan_data_folder = [data_dir, filesep, 'field_scans'];
 % Load the datasets and backpropagate to a series of planes
 filename       = 'field_scan_probe_A_all_channels_postprocessed';
 input_filename = [scan_data_folder, filesep, filename, '.mat'];
-load(input_filename, 'pressure', 'time_axis', 'Ny', 'Nx', 'c_water', ...
+load(input_filename, 'pressure', 'time_axis', 'Ny', 'Nx', 'Nt', 'c_water', ...
                                     'x_pos', 'y_pos', 'z_pos', 'dx', 'dt');
 plotMeasurementPlane(pressure, x_pos, y_pos)
 
@@ -48,7 +48,7 @@ source_planes  = offset + (1:Nsource_planes) - ceil(Nsource_planes/2);
 z_vec          = z0 + (source_planes * dx);
 
 % Backpropagation to series of source planes using angular spectrum method
-options      = {'GridExpansion', 0, 'Plot', 0, 'Reverse', 1};
+options      = {'Plot', 0, 'Reverse', 1};
 pressure_max = angularSpectrum(pressure, dx, dt, z_vec, c_water, options{:});
 pressure_max = flip(pressure_max, 3); % Required since reverse mode is used
 sliceViewer(pressure_max, [dx, dx, dx]);
@@ -58,27 +58,27 @@ source_plane = 3;
 source_z     = z_vec(source_plane);
 
 % -------------------------------------------------------------------------
-% Assessment of the effect of grid expansion on this pressure data
-
-% Backpropagation without grid expansion
-options            = {'GridExpansion', 0, 'Plot', 0, 'Reverse', 1};
-[~, pressure_time] = angularSpectrum(pressure, dx, dt, source_z, c_water, options{:});
-
-% Backpropagation with grid expansion
-options               = {'GridExpansion', Nx, 'Plot', 0, 'Reverse', 1};
-[~, pressure_time_ge] = angularSpectrum(pressure, dx, dt, source_z, c_water, options{:});
-
-% Demonstrate that grid expansion is not required due to very low error
-diff_time    = abs(pressure_time_ge - pressure_time);
-norm_max_err = 1e2 * max(diff_time, [], 3) / max(pressure_time_ge(:));
-
-figure;
-imagesc(norm_max_err);
-c = colorbar;
-axis image
-colormap(getBatlow);
-ylabel(c, 'Max difference [%]');
-drawnow
+% % Assessment of the effect of grid expansion on this pressure data
+% 
+% % Backpropagation without grid expansion
+% options            = {'Plot', 0, 'Reverse', 1};
+% [~, pressure_time] = angularSpectrum(pressure, dx, dt, source_z, c_water, options{:});
+% 
+% % Backpropagation with grid expansion
+% options               = {'GridExpansion', round(Nx/2), 'Plot', 0, 'Reverse', 1};
+% [~, pressure_time_ge] = angularSpectrum(pressure, dx, dt, source_z, c_water, options{:});
+% 
+% % Demonstrate that grid expansion is not required due to very low error
+% diff_time    = abs(pressure_time_ge - pressure_time);
+% norm_max_err = 1e2 * max(diff_time, [], 3) / max(pressure_time_ge(:));
+% 
+% figure;
+% imagesc(norm_max_err);
+% c = colorbar;
+% axis image
+% colormap(getBatlow);
+% ylabel(c, 'Max difference [%]');
+% drawnow
 
 % -------------------------------------------------------------------------
 % Backpropagate all datasets to the source plane and append to data file
@@ -93,12 +93,22 @@ backpropagate(scan_data_folder, filename, source_z, options);
 filename = 'field_scan_probe_F_all_channels_postprocessed';
 backpropagate(scan_data_folder, filename, source_z, options);
 
-function backpropagate(data_dir, filename, source_z, options)
+function backpropagate(data_dir, filename, source_z, as_options)
 
-input_filename   = [data_dir, filesep, filename, '.mat'];
-load(input_filename, 'pressure', 'c_water', 'dx', 'dt');
-[~, source_p]    = angularSpectrum(pressure, dx, dt, source_z, c_water, options{:});
-save(input_filename, 'source_p', 'source_z', '-append');
+% Load the pressure measurement plane
+input_filename = [data_dir, filesep, filename, '.mat'];
+load(input_filename, 'pressure', 'c_water', 'time_axis', 'dx', 'dt', 'Nt');
+
+% Backpropagate to source_z
+[~, source_p] = angularSpectrum(pressure, dx, dt, source_z, c_water, as_options{:});
+
+% Centre the source waveform in time and adjust the source time axis
+i_shift  = Nt / 2;
+source_p = circshift(source_p, [0, 0, i_shift]);
+source_t = time_axis - (source_z / c_water) - (i_shift * dt);
+
+% Save the source plane
+save(input_filename, 'source_p', 'source_t', 'source_z', '-append');
 
 end
 
