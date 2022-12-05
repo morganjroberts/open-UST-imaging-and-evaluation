@@ -13,11 +13,13 @@ axis image;
 colorbar;
 colormap(getBatlow);
 title('Pressure Squared Integral');
+set(gca, 'YDir', 'normal');
 
 subplot(4, 1, 2);
 contourf(x_pos, y_pos, ssp/max(ssp(:)), 0.1:0.1:1);
 axis image;
 colorbar
+set(gca, 'YDir', 'normal');
 
 subplot(4, 1, 3);
 imagesc(x_pos, y_pos, max_p);
@@ -25,11 +27,13 @@ axis image;
 colorbar;
 colormap(getBatlow);
 title('Maximum Pressure');
+set(gca, 'YDir', 'normal');
 
 subplot(4, 1, 4);
 contourf(x_pos, y_pos, max_p/max(max_p(:)), 0.1:0.1:1);
 axis image;
 colorbar
+set(gca, 'YDir', 'normal');
 
 drawnow
 

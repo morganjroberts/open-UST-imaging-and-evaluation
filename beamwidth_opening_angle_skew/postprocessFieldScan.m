@@ -47,6 +47,7 @@ arguments
     cutoff_f
     options.TukeyParam    = 0.05;
     options.PostPadFactor = 1;
+    options.SpatialWindow = true;
 end
 
 % Load data
@@ -60,7 +61,9 @@ disp(['Completed in ', num2str(toc), ' s']);
 [pressure, time_axis, Nt] = truncatePressureInTime(pressure, time_axis, t_cut, Clip=0.02, TukeyParam=options.TukeyParam, Plot=true);
 
 % Apply a spatial window to the measurement plane
-pressure = spatialWindowMeasurementPlane(pressure, border);
+if options.SpatialWindow
+    pressure = spatialWindowMeasurementPlane(pressure, border);
+end
 
 % Low pass filter the measurement data
 pressure = applyFilterVolume(pressure, dt, cutoff_f, 3, RemovePad=true, PadLength=2, ExtraPlot=true);
@@ -68,7 +71,7 @@ pressure = applyFilterVolume(pressure, dt, cutoff_f, 3, RemovePad=true, PadLengt
 % Post-pad the signal and adjust the time axis
 pad       = zeros(Ny, Nx, Nt*options.PostPadFactor);
 pressure  = cat(3, pressure, pad);
-time_axis = [time_axis, (time_axis(end) + dt + (0:dt:(Nt - 1) * dt))];
+time_axis = [time_axis, (time_axis(end) + dt + (0:dt:(Nt - 1) * dt))]; % only valid for postpad = 1!
 Nt        = length(time_axis);
 
 % Save the post-processed data to the same directory with a new filename
