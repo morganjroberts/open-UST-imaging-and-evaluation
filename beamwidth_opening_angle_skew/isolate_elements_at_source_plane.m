@@ -44,7 +44,6 @@ max_p = max(M.source_p, [], 3);
 figure;
 plot(max_p(:, i8));
 
-close all
 % Build mask
 xl = 144;
 xr = 152;
@@ -146,9 +145,70 @@ V = load(input_filename, 'pressure', 'z_pos', 'time_axis', 'Nt', 'Nx', 'Ny');
 % NOTE: this does not need to be rounded to the nearest dx
 z_proj = M.source_z + abs(V.z_pos) - abs(M.z_pos);
 
-as_options = {'GridExpansion', 250, 'Plot', 0, 'Reverse', 0};
-[~, val_p] = angularSpectrum(mask_source, M.dx, M.dt, z_proj, M.c_water, as_options{:});
+% % ------------------------------------------------------------------------
+% % Show that the effect of grid expansion is only 0.25% max error reduction,
+% % at the expense of large memory. GE won't be used.
+% as_options = {'GridExpansion', 0, 'Plot', 0, 'Reverse', 0, 'DataCast', 'single', 'DataRecast', 1};
+% [~, val_p] = angularSpectrum(mask_source, M.dx, M.dt, z_proj, M.c_water, as_options{:});
+% 
+% as_options = {'GridExpansion', 200, 'Plot', 0, 'Reverse', 0, 'DataCast', 'single', 'DataRecast', 1};
+% [~, val_p_ge] = angularSpectrum(mask_source, M.dx, M.dt, z_proj, M.c_water, as_options{:});
+% 
+% diff = (val_p - val_p_ge);
+% norm_max_err = max(abs(diff), [], 3) / max(val_p(:));
+% figure;
+% subplot(3, 1, 1);
+% imagesc(sum(val_p.^2, 3));
+% axis image
+% colorbar
+% colormap(getBatlow);
+% title('Pressure squared integral without grid expansion')
+% 
+% subplot(3, 1, 2);
+% imagesc(sum(val_p_ge.^2, 3));
+% axis image
+% colorbar
+% colormap(getBatlow);
+% title('Pressure squared integral with grid expansion')
+% 
+% subplot(3, 1, 3);
+% imagesc(1e2*norm_max_err);
+% axis image
+% colorbar
+% colormap(getBatlow);
+% title('Difference [%]')
+% % ------------------------------------------------------------------------
+
 %%
+
+as_options = {'GridExpansion', 0, 'Plot', 0, 'Reverse', 0, 'DataCast', 'single', 'DataRecast', 1};
+[~, val_p] = angularSpectrum(mask_source, M.dx, M.dt, z_proj, M.c_water, as_options{:});
+
+%%
+
+% Compare measured and validation at the centre frequency 1.2MHz
+Fs = 1 / M.dt;
+[a_meas, ~, f_meas] = extractAmpPhase(val_p, Fs, 1.2e6, 'Dim', 3);
+[a_val, ~, f_val]   = extractAmpPhase(V.pressure, Fs, 1.2e6, 'Dim', 3);
+
+
+figure;
+subplot(3, 2, 1);
+imagesc(a_meas);
+axis image
+colorbar
+colormap(getBatlow);
+title('Measured, reprojected');
+
+subplot(3, 2, 3);
+imagesc(a_val);
+axis image
+colorbar
+colormap(getBatlow);
+title('Validation');
+%%
+% Compare measured and validation using sum of squared pressure
+% (normalised)
 ssp_meas = sum(val_p.^2, 3);
 ssp_val  = sum(V.pressure.^2, 3);
 
@@ -192,20 +252,3 @@ plot(ssp_val(:, round(M.Nx/2)));
 plot(ssp_meas(:, round(M.Nx/2)));
 legend({'Validation', 'Measured'});
 
-
-% 
-% function buildElementMask(pitch, width, c0, options)
-% % takes cartesian initial guess for c0
-% % returns binary mask
-% arguments
-%     pitch
-%     width
-%     c0
-%     options.Mode = 'X';
-% end
-% 
-% switch options.Mode
-%     case 'X'
-% 
-% 
-% end
