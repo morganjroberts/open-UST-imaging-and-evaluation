@@ -42,7 +42,7 @@ tukey_param = 0.05;
 cutoff_f    = 2e6; % set to 2 MHz since the spatial sampling step doesn't support higher than ~2.1MHz
 
 % Visualise measurement plane before processing
-plotMeasurementPlane(pressure, x_pos, y_pos)
+plotMeasurementPlane(pressure, Xpos=x_pos, Ypos=y_pos)
 
 % Inspect traces, truncate pressure array to remove hydrophone tip reflection
 ix = round(Nx/2);
@@ -53,7 +53,7 @@ iy = round(Ny/2);
 pressure = spatialWindowMeasurementPlane(pressure, border);
 
 % Visualise measurement plane after processing
-plotMeasurementPlane(pressure, x_pos, y_pos)
+plotMeasurementPlane(pressure, Xpos=x_pos, Ypos=y_pos)
 
 % ------------------------------------------------------------------------
 % Now, perform the post processing for all files

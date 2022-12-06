@@ -38,7 +38,7 @@ filename       = 'field_scan_probe_A_all_channels_postprocessed';
 input_filename = [scan_data_folder, filesep, filename, '.mat'];
 load(input_filename, 'pressure', 'time_axis', 'Ny', 'Nx', 'Nt', 'c_water', ...
                                     'x_pos', 'y_pos', 'z_pos', 'dx', 'dt');
-plotMeasurementPlane(pressure, x_pos, y_pos)
+plotMeasurementPlane(pressure, Xpos=x_pos, Ypos=y_pos)
 
 % Create vector of plane positions surrounding the expected z-position
 Nsource_planes = 5;
