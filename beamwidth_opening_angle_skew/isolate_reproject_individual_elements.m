@@ -27,9 +27,7 @@ filenames       = {'field_scan_probe_A_all_channels_postprocessed', ...
                    'field_scan_probe_F_all_channels_postprocessed'};
 
 input_filename = [scan_data_folder, filesep, filenames{1}, '.mat'];
-load(input_filename, 'source_p', 'Ny', 'Nx',...
-                     'Nt', 'source_z', 'c_water', 'x_pos', 'y_pos', ...
-                     'z_pos', 'dx', 'dt');
+load(input_filename, 'source_p', 'source_z', 'c_water', 'dx', 'dt', 'z_pos');
 loaded_probe = 1;
 
 % Target plane locations and projection distances
@@ -63,15 +61,15 @@ a           = randn(1, Nfft);
 % Work out the actual number of frequencies
 freqs(freqs < f_min) = 0;
 freqs(freqs > f_max) = 0;
-i_f_start = find(freqs, 1, 'first');
-i_f_end   = find(freqs, 1, 'last');
+i_f_start            = find(freqs, 1, 'first');
+i_f_end              = find(freqs, 1, 'last');
 freqs                = freqs(i_f_start:i_f_end);
 Nfreqs               = length(freqs);
 delta_f              = freqs(2) - freqs(1);
 
 % Check the widest opening angle that is contained by the proposed grid
 % length
-Nz_max = round(z_proj(end) / dx);
+Nz_max     = round(z_proj(end) / dx);
 theta_max  = 2 * atand(Nx_proj / (2 * Nz_max));
 disp(['Max opening angle at z = ', num2str(z_proj(end)*1e3), ' mm is ', ...
     num2str(theta_max), ' deg']);
@@ -97,9 +95,9 @@ ups          = 7;
 mask_size    = [0.00235, 0.01135];
 
 
-as_options  = {'GridExpansion', 0, 'Plot', 0, 'Reverse', 0, 'DataCast', 'single', 'DataRecast', 0};
+as_options  = {'GridExpansion', 0, 'Plot', 0, 'Reverse', 0, 'DataCast', 'single', 'DataRecast', 0, 'FFTLength', 4096};
 
-for idx = 1%1:Nelement
+for idx = 1:Nelement
     [channel, probe_id] = ind2sub([Nper_mod, Nmodules], idx);
     disp(['Probe ', num2str(probe_id), ', channel ', num2str(channel)]);
 
@@ -107,9 +105,7 @@ for idx = 1%1:Nelement
     if loaded_probe ~= probe_id
         input_filename = [scan_data_folder, filesep, filenames{probe_id}, '.mat'];
         disp('New probe dataset required, loading in progress ...');
-        load(input_filename, 'source_p', 'Ny', 'Nx',...
-                             'Nt', 'source_z', 'c_water', 'x_pos', 'y_pos', ...
-                             'z_pos', 'dx', 'dt');
+        load(input_filename, 'source_p', 'c_water');
         loaded_probe = probe_id;
     end
 
@@ -126,15 +122,22 @@ for idx = 1%1:Nelement
     % (y_ind, x_ind, t_ind, z_ind)
 
     % Compute and store amplitude spectra
-    [f, as_meas] = spect(proj_p, Fs, 'FFTLength', Nfft, 'Dim', 3);
-    figure; stem(abs(f-freqs));
+    [~, as_meas] = spect(proj_p, Fs, 'FFTLength', Nfft, 'Dim', 3);
     beam_data(:,:,:,:,idx) = as_meas(:,:,i_f_start:i_f_end,:);
 
-    keyboard
+    % Append to file
+    Ny = Ny_proj;
+    Nx = Nx_proj;
+    filename = 'isolated_reprojected_beam_data_probes_AEF';
+    output_filename = [scan_data_folder, filesep, filename, '.mat'];
+    if ~exist(output_filename, 'file')
+        save(output_filename, 'beam_data', 'freqs', 'c_water', 'dx', 'dt', 'Ny', 'Nx', 'Fs', 'Nfreqs', 'z_proj', 'z_targ', '-v7.3');
+    else 
+        save(output_filename, 'beam_data', 'freqs', 'c_water', 'dx', 'dt', 'Ny', 'Nx', 'Fs', 'Nfreqs', 'z_proj', 'z_targ', '-append');
+    end
 end
 
 
-%%
 
 function centred_p = centreElementInNewGrid(source_p, Nx_new, Ny_new, options)
 
