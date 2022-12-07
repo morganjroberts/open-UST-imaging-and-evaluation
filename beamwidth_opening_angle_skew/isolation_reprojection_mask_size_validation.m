@@ -127,6 +127,7 @@ ac_val          = ac_val / max( ac_val(:) );
 % compare with validation plane, store sum of normalised absolute errors
 for odx = 1:No
     mask_size = mask_sizes(odx, :);
+    mask_size = [2.35e-3, 11.35e-3];
     
     % Extract the source pressure from a single channel
     extract_p = extractSourceElement(M.source_p, M.dx, [iy0, ix0], ...
