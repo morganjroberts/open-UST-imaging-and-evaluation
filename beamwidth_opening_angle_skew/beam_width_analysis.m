@@ -112,7 +112,7 @@ plot_thresh = -30;
 figure;
 subplot(1, 2, 1);
 hold on;
-imagesc(y_pos*1e3, freqs*1e-6, mean_dB', [plot_thresh, 0]);
+imagesc(y_pos*1e3, freqs*1e-6, mean_resp', [plot_thresh, 0]);
 c = colorbar;
 set(gca, 'YDir', 'normal');
 colormap(getBatlow);
