@@ -1,3 +1,16 @@
+% FILENAME:
+%     beam_width_analysis.m
+%
+% DESCRIPTION:
+%     Script to compute the elevation beam width of N=48 UST elements.
+%
+% INPUT DATA FILENAMES:
+%     <data-dir>\field_scans\_______.mat      
+%
+% ABOUT:
+%     author:      - Morgan Roberts
+%     last update: - 6/12/22
+
 close all
 clearvars
 
@@ -79,6 +92,7 @@ end
 % Calculate the mean elevational response and the standard deviation
 mean_bw = mean(beamwidth);
 std_bw  = std(beamwidth);
+disp(['Elevation Beamwidth mean = ', num2str(1e3*mean_bw, 3),  ' mm, std = ', num2str(1e3*std_bw, 3), ' mm']);
 
 % Calculate the mean elevational response, convert to dB and compute
 % standard deviation
@@ -106,8 +120,8 @@ axis square
 ylabel('Frequency [MHz]');
 xlabel('y-position [mm]');
 ylabel(c, 'Pressure [dB]');
-xline(y_pos(Y.imin)*1e3, 'k--', 'linewidth', 1.5);
-xline(y_pos(Y.imax)*1e3, 'k--', 'linewidth', 1.5);
+% xline(y_pos(Y.imin)*1e3, 'k--', 'linewidth', 1.5);
+% xline(y_pos(Y.imax)*1e3, 'k--', 'linewidth', 1.5);
 xlim( 1e3 * y_pos([1, end]) );
 ylim( 1e-6 * freqs([1, end]) );
 
@@ -131,13 +145,7 @@ face_colour = [175, 238, 238]/255;
 figure;
 h2 = histogram(beamwidth*1e3, 10);
 set(h2,'facecolor',face_colour);
-hold on
-f = histfit(beamwidth*1e3);
-delete(f(1));
-set(f(2),'color','k');
 xlabel('Beamwidth [mm]');
 ylabel('Counts');
-xlim(1e3*mean_bw + [-1.5, 1.5]);
-leg = ['Gaussian fit', newline, '\mu = ', num2str(1e3*mean_bw, 3),...
-       ' mm', newline, '\sigma = ', num2str(std_bw*1e3, 3), ' mm'];
-legend([f(2)], {leg}, 'location', 'northoutside', 'numcolumns', 2);
+% xlim(1e3*mean_bw + [-1.5, 1.5]);
+

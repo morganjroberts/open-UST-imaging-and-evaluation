@@ -9,7 +9,15 @@
 %     Within each plane the centroid is located. A line is fit in 3D to the
 %     5 centroids, defining the beam axis. The angle of this line is
 %     calculated in the elevation and lateral planes and stored. The bulk
-%     lateral skew of the modules is then removed.
+%     lateral skew of the modules (due to scan plane misalignment) is then
+%     removed.
+%
+% INPUT DATA FILENAMES:
+%     <data-dir>\field_scans\_______.mat      
+%
+% ABOUT:
+%     author:      - Morgan Roberts
+%     last update: - 6/12/22
 
 close all
 clearvars
