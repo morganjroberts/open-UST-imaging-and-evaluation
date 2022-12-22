@@ -141,6 +141,23 @@ set(h, 'AlphaData', ~isnan(std_Afc));
 colorbar
 title('Std f_c');
 
+
+% Calculate centre freq statistics over all bins
+% overall Number of observations
+alln = sum(Nel, 'all', 'omitnan');
+% overall Mean
+allmean = sum(mean_fc .* Nel / alln, 'all', 'omitnan');
+% overall Error Sum of Squares
+ESS = sum(std_fc.^2 .* (Nel - 1), 'all', 'omitnan');
+% overall Group Sum of Squares
+GSS = sum( ((mean_fc - allmean).^2) .* Nel, 'all', 'omitnan');
+% overall Standard Deviation
+allstd = sqrt( (ESS + GSS) / (alln - 1) );
+disp( ['Mean f_c over ', num2str(alln), ' rays: ', num2str(allmean), ' Hz'] );
+disp( ['Std  f_c over ', num2str(alln), ' rays: ', num2str(allstd), ' Hz'] );
+
+
+
 % ------------------------------------------------------------------------
 % Plot the effect of emission and incidence angle on the mean and standard
 % deviation of the recieve amplitude at the centre frequency.
@@ -175,3 +192,5 @@ set(fig1,'renderer','Painters');
 figure_filename = [repo_dir, filesep, 'transmit_receive_response', filesep, 'figures', filesep, 'tx_rx_directional_response_mean_std'];
 print(fig1, figure_filename, '-depsc2');
 print(fig1, figure_filename, '-dsvg');
+
+disp([ 'Max std dev ', num2str( max( 1e2*std_Afc/max(mean_Afc(:)), [], 'all' ) ), ' %' ]);

@@ -58,8 +58,10 @@ g_data = groupSimilarSignals(fa_data, is_opposite, Align=true, RestrictXcorr=6, 
 [freqs, as] = spect(g_data, Fs, 'Dim', 2, 'FFTLength', Nt * 6);
 
 % Compute statistics on the amplitude spectra
-dbThresh = -20;
+dbThresh = -12;
 stats = computeStats(freqs, as', dbThresh);
+disp(stats);
+disp(stats.mean);
 
 % Plot the traces and spectra with mean and variation shown
 i_start = find(sum(g_data, 1), 1, 'first') - 10;

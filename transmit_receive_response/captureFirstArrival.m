@@ -137,7 +137,7 @@ for tdx = 1:Ntdx
             i_lms(tdx, rdx) = i_lm;
 
             % Build a custom tukey window for the signal ring down
-            win_R = [win(options.TaperWidth+1:end); zeros(Nt - i_lm - options.TaperWidth, 1)];
+            win_R = [(options.TaperWidth+1:end); zeros(Nt - i_lm - options.TaperWidth, 1)];
             
             % Apply the window to all samples after the last-motion
             trace(i_lm + 1:end)                = trace(i_lm + 1:end) .* win_R;

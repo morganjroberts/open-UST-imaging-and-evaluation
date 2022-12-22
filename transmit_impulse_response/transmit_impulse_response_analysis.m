@@ -56,7 +56,7 @@ input_filename = 'transmit_impulse_response_probe_q';
 %  
 % input_filename = 'transmit_impulse_response_probes_AEFG';
 % [t_AEFG, mean_p_AEFG, f_AEFG, mean_as_AEFG] = processImpulseResponse(input_dir, input_filename, ...
-%     cutoff_f, ExtraPlot=0, spectMode='db', dbThresh=-10, traceXlim='time_axis', traceYlim=[-Inf, Inf], spectXlim=[0.4, 5], spectYlim=[-40,2]);
+%     cutoff_f, ExtraPlot=0, spectMode='db', dbThresh=-6, traceXlim='time_axis', traceYlim=[-Inf, Inf], spectXlim=[0.4, 5], spectYlim=[-40,2]);
 
 %% Compare the three datasets
 

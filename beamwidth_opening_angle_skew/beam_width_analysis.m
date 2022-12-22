@@ -109,10 +109,10 @@ std_pc    = 1e2 * std_resp / max_val;
 [~, Y, ~] = locateThresholdRegion( permute( mean_resp, [1, 2, 3] ), thresh );
 plot_thresh = -30;
 
-figure;
+fig = figure;
 subplot(1, 2, 1);
 hold on;
-imagesc(y_pos*1e3, freqs*1e-6, mean_resp', [plot_thresh, 0]);
+imagesc(y_pos*1e3, freqs*1e-6, mean_dB', [plot_thresh, 0]);
 c = colorbar;
 set(gca, 'YDir', 'normal');
 colormap(getBatlow);
@@ -137,15 +137,28 @@ ylabel(c, 'Standard Deviation [%]');
 xlim( 1e3 * y_pos([1, end]) );
 ylim( 1e-6 * freqs([1, end]) );
 
+set(fig, 'Position', [404 278 932 602]);
+set(fig,'renderer','Painters');
+filename = [pwd, '\figures\elevational_response'];
+print(fig, filename, '-dsvg');
+print(fig, filename, '-depsc2');
+
 % ------------------------------------------------------------------------
 % Plot the beamwidth histogram
 
 face_colour = [175, 238, 238]/255;
 
 figure;
-h2 = histogram(beamwidth*1e3, 10);
+bin_edges = 15:0.25:17.5;
+h2 = histogram(beamwidth*1e3, bin_edges);
 set(h2,'facecolor',face_colour);
 xlabel('Beamwidth [mm]');
 ylabel('Counts');
-% xlim(1e3*mean_bw + [-1.5, 1.5]);
+axis square
+xlim(bin_edges([2, end]))
+
+% set(fig,'renderer','Painters');
+% filename = [pwd, '\figures\beamwidth_histogram'];
+% print(fig, filename, '-dsvg');
+% print(fig, filename, '-depsc2');
 

@@ -42,8 +42,9 @@ thresh = -6;
 % Setup arc interpolation
 x_data = repmat( x_pos(:), [1, Nz] );
 z_data = repmat( z_targ, [Nx, 1] );
-Narc   = floor( (z_targ(end) - z_targ(1)) / dx );  
-r_q    = z_targ(1) + (0:dx:(Narc - 1) * dx);
+r_every = 1;
+Narc   = floor( (z_targ(end) - z_targ(1)) / (r_every*dx) );  
+r_q    = z_targ(1) + (0:(r_every*dx):(Narc - 1) * (r_every*dx));
 theta  = -60:60;
 Ntheta = length(theta);
 arc_x  = r_q' * sind(theta);
@@ -53,7 +54,7 @@ arc_z  = r_q' * cosd(theta);  % indexed (Nr, Ntheta)
 dir_resp      = zeros(Ntheta, Nfreqs, Nel);
 opening_angle = zeros(1, Nel);
 
-ExtraPlot = 0;
+ExtraPlot = 1;
 
 % Loop over each element
 for edx = 1:Nel
@@ -96,7 +97,7 @@ for edx = 1:Nel
         % Save directional response for the current frequency and element
         dir_resp(:, fdx, edx) = arc_p_mean;
     
-        if ExtraPlot
+        if ExtraPlot && fdx == 101 && edx == 1
     
             % Interpolated Pressure field for plotting
             p_q = interp2( z_data, x_data, p_data, r_q, x_pos', 'cubic' );
@@ -121,6 +122,8 @@ for edx = 1:Nel
             ylabel('Normalised Directional Response');
             set(gcf, 'Position', [316 510 1232 420]);
             legend({'Normalised Interpolated Arcs', 'Mean Response'}, 'location', 'northoutside')
+
+            drawnow
 
         end
     end
@@ -156,7 +159,7 @@ std_pc    = 1e2 * std_resp / max_val;
 % Plot the mean lateral opening angle and the standard deviation
 plot_thresh = -20;
 
-figure;
+fig = figure;
 subplot(1, 2, 1);
 hold on;
 imagesc(theta, 1e-6*freqs, mean_dB', [plot_thresh, 0]);
@@ -182,17 +185,21 @@ ylabel(c, 'Standard Deviation [%]');
 xlim( theta([1, end]) );
 ylim( 1e-6 * freqs([1, end]) );
 
+set(fig, 'Position', [404 278 932 602]);
+
 % ------------------------------------------------------------------------
 % Plot the beamwidth histogram
 
 face_colour = [175, 238, 238]/255;
 
 figure;
-h2 = histogram(opening_angle, 10);
+bin_edges = 48:2:64;
+h2 = histogram(opening_angle, bin_edges);
 set(h2,'facecolor',face_colour);
 xlabel('Opening Angle [deg]');
 ylabel('Counts');
-% xlim(1e3*mean_bw + [-1.5, 1.5]);
+axis square
+xlim(bin_edges([1, end]))
 
 
 

@@ -41,7 +41,7 @@ input_filename = [scan_data_folder, filesep, filename, '.mat'];
 load(input_filename, 'beam_data', 'freqs', 'c_water', 'dx', 'Ny', 'Nx', 'Fs', 'dt', 'z_proj', 'z_targ', 'Nfreqs');
 disp(['Completed in ', num2str(toc), ' s']);
 fprintf('\n');
-
+%%
 % Calculate x and y position vectors
 x_pos = 0:dx:(Nx-1) * dx;
 x_pos = x_pos - x_pos( round(Nx / 2) );
@@ -100,7 +100,8 @@ for edx = 1:Nel
 end
 
 % Calculate absolute skews, with bulk lateral skew corrected
-abs_skew_lat = abs(skew_lat - bulk_lat_skew);
+% abs_skew_lat = abs(skew_lat - bulk_lat_skew);
+abs_skew_lat = abs(skew_lat);
 abs_skew_ele = abs(skew_ele);
 
 % Calculate means and standard deviations
@@ -118,20 +119,19 @@ disp(['Lateral skew mean = ', num2str(skew_lat_mean, 4),  ' deg, std = ', num2st
 face_colour = [175, 238, 238]/255;
 
 figure;
-subplot(1, 2, 1);
-h = histogram(abs_skew_ele, 10);
+% subplot(1, 2, 1);
+h = histogram(abs_skew_ele, 0:0.1:1);
 set(h,'facecolor',face_colour);
-xlabel('Skew [deg]');
+xlabel('Elevational Skew [deg]');
 ylabel('Counts');
 xlim([0, Inf]);
-title('Elevation Skew');
 axis square
 
-subplot(1, 2, 2);
-h = histogram(abs_skew_lat, 10);
+figure;
+% subplot(1, 2, 2);
+h = histogram(abs_skew_lat, 0:0.5:3.5);
 set(h,'facecolor',face_colour);
-xlabel('Skew [deg]');
+xlabel('Lateral Skew [deg]');
 ylabel('Counts');
 xlim([0, Inf]);
-title('Lateral Skew');
 axis square

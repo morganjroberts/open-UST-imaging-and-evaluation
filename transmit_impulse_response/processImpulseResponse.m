@@ -112,6 +112,7 @@ Fs          = 1 / dt;
 stats = computeStats(freqs, as, options.dbThresh);
 disp(input_filename);
 disp(stats);
+disp(stats.mean);
 
 % Remove padding introduced by applyFilterVolume
 pressure_shift = pressure_shift((Nt * pad_len) + 1 : end - (Nt * pad_len), : );
