@@ -57,6 +57,7 @@ sliceViewer(pressure_max, [dx, dx, dx]);
 source_plane = 3;
 source_z     = z_vec(source_plane);
 
+%%
 % -------------------------------------------------------------------------
 % % Assessment of the effect of grid expansion on this pressure data
 % 

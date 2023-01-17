@@ -1,4 +1,4 @@
-function [time_axis, mean_p_trace, freqs, mean_p_spect] = processImpulseResponse(input_dir, input_filename, cutoff_f, options)
+function [time_axis, mean_p_trace, freqs, mean_p_spect, fig] = processImpulseResponse(input_dir, input_filename, cutoff_f, options)
 %PROCESSIMPULSERESPONSE Manages the entire transmit-impulse-response processing workflow
 %
 % DESCRIPTION:

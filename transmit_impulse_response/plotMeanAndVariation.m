@@ -79,7 +79,7 @@ subplot(2, 1, 1);
 hold on
 
 % plot mean pressure trace
-h1 = plot(1e6*time_axis, mean_p_trace*1e-3, 'k-', 'linewidth', 2);
+h1 = plot(1e6*time_axis, mean_p_trace*1e-3, 'k-', 'linewidth', 1.5);
 % plot entire range of measured data
 h2 = fill(1e6*t_fill, 1e-3*pressure_fill, fill_col);
 set(h2, 'EdgeColor','none');
@@ -100,7 +100,7 @@ legend([h1, h2], {'Mean', 'Measured Variation'});
 % Frequency domain plot ---------------------------------------------------
 % if required, change amplitude data to db, instead if linear
 if strcmp(spectMode, 'db')
-    ref_val           = max(mean_p_spect); % this may need to be an input argument later
+    ref_val           = max(mean_p_spect) % this may need to be an input argument later
     mean_p_spect      = 20 * log10(mean_p_spect / ref_val);
     as_fill           = 20 * log10(as_fill / ref_val);
     stats.mean.y_low  = 20 * log10(stats.mean.y_low / ref_val);
@@ -112,7 +112,7 @@ subplot(2, 1, 2);
 hold on
 
 % plot mean pressure amplitude spectrum
-plot(freqs*1e-6, mean_p_spect, 'k-', 'linewidth', 2);
+plot(freqs*1e-6, mean_p_spect, 'k-', 'linewidth', 1.5);
 
 % plot entire range of measured data
 h2 = fill(1e-6*f_fill, as_fill, fill_col);
@@ -123,7 +123,7 @@ uistack(h2,'bottom');
 h5 = xline(stats.mean_fc*1e-6, 'k--');
 h6 = plot(1e-6*[stats.mean.x_low, stats.mean.x_high], ...
           [stats.mean.y_low, stats.mean.y_high], ...
-          'r-', 'marker', '.', 'markersize', 12);
+          'b-', 'marker', '.', 'markersize', 12);
 
 if strcmp(spectMode, 'db')
     yline(0, 'k--');

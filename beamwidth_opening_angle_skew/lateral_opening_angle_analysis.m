@@ -146,6 +146,7 @@ mean_oa = mean(opening_angle);
 std_oa  = std(opening_angle);
 disp(['Lateral opening angle mean = ', num2str(mean_oa, 3),  ' deg, std = ', num2str(std_oa, 3), ' deg']);
 
+%%
 % Calculate the mean directional response, convert to dB and compute
 % standard deviation
 mean_resp = mean(dir_resp, 3, 'omitnan');
@@ -154,52 +155,62 @@ mean_dB   = 20 * log10(mean_resp / max_val);
 std_resp  = std(dir_resp, 0, 3);
 std_pc    = 1e2 * std_resp / max_val;
 
-%%
+std_dB = 20 * log10( std_resp / max_val );
+std_dB = imboxfilt(std_dB, 3);
+disp([ 'Max directional response deviation: ', num2str(max(std_dB(:))), ' dB' ]);
+
+mean_dB = imboxfilt(mean_dB, 3);
+std_pc = imboxfilt(std_pc, 3);
+
 % ------------------------------------------------------------------------
 % Plot the mean lateral opening angle and the standard deviation
-plot_thresh = -20;
+plot_thresh = -30;
 
 fig = figure;
 subplot(1, 2, 1);
 hold on;
 imagesc(theta, 1e-6*freqs, mean_dB', [plot_thresh, 0]);
-c = colorbar;
+c = colorbar('northoutside');
 set(gca, 'YDir', 'normal');
-colormap(getBatlow);
+colormap(getColorMap);
 axis square
 ylabel('Frequency [MHz]');
 xlabel('Theta [deg]');
 xlim( theta([1, end]) );
 ylim( 1e-6 * freqs([1, end]) );
-ylabel(c, 'Pressure [dB]');
+ylabel(c, 'Mean Amplitude [dB]');
 
 subplot(1, 2, 2);
-imagesc(theta, 1e-6*freqs, std_pc');
-c = colorbar;
+% imagesc(theta, 1e-6*freqs, std_pc');
+imagesc(theta, 1e-6*freqs, std_dB', [-60, -20]);
+c = colorbar('northoutside');
 set(gca, 'YDir', 'normal');
-colormap(getBatlow);
+colormap(getColorMap);
 axis square
 ylabel('Frequency [MHz]');
 xlabel('Theta [deg]');
-ylabel(c, 'Standard Deviation [%]');
+% ylabel(c, 'Standard Deviation [%]');
+ylabel(c, 'Standard Deviation [dB]');
 xlim( theta([1, end]) );
 ylim( 1e-6 * freqs([1, end]) );
 
-set(fig, 'Position', [404 278 932 602]);
+% set(fig, 'Position', [404 278 932 602]);
 
 % ------------------------------------------------------------------------
 % Plot the beamwidth histogram
 
 face_colour = [175, 238, 238]/255;
-
+%%
 figure;
+subplot(3, 2, 1);
 bin_edges = 48:2:64;
 h2 = histogram(opening_angle, bin_edges);
 set(h2,'facecolor',face_colour);
 xlabel('Opening Angle [deg]');
 ylabel('Counts');
-axis square
+% axis square
 xlim(bin_edges([1, end]))
+ylim([0, 12])
 
 
 

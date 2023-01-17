@@ -66,6 +66,7 @@ iy0 = 31;
 % NOTE: this does not need to be rounded to the nearest dx
 z_proj = M.source_z + abs(V.z_pos) - abs(M.z_pos);
 
+
 % ------------------------------------------------------------------------
 % Show that the effect of grid expansion is only 0.25% max error reduction,
 % at the expense of large memory. GE won't be used.
@@ -127,7 +128,7 @@ ac_val          = ac_val / max( ac_val(:) );
 % compare with validation plane, store sum of normalised absolute errors
 for odx = 1:No
     mask_size = mask_sizes(odx, :);
-    mask_size = [2.35e-3, 11.35e-3];
+%     mask_size = [2.35e-3, 11.35e-3];
     
     % Extract the source pressure from a single channel
     extract_p = extractSourceElement(M.source_p, M.dx, [iy0, ix0], ...

@@ -73,3 +73,15 @@ set(fig,'renderer','Painters');
 figure_filename = [repo_dir, filesep, 'transmit_receive_response', filesep, 'figures', filesep, 'tx_rx_on_axis_response'];
 print(fig, figure_filename, '-depsc2');
 print(fig, figure_filename, '-dsvg');
+%%
+ax_all = findall(fig,'type','axes');
+ax2    = ax_all(1);
+ax1    = ax_all(2);
+ax1.Title = [];
+ax2.Title = [];
+ylabel(ax2, 'Voltage [dB]');
+ylabel(ax1, 'Voltage [au]');
+ylim(ax2, [-50, 2]);
+xlim(ax2, [0.4, 2.8]);
+delete(ax2.Legend)
+legend([ax1.Children(1), ax1.Children(2)], {'Mean ', 'Range'}, 'numcolumns', 1);

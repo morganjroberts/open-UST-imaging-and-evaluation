@@ -72,6 +72,9 @@ i_high       = find(state_change(I+1:end), 1, 'first') + I;
 % Extract coordinates for plotting later
 y_low  = as_mean(i_low);
 y_high = as_mean(i_high);
+mean_y = mean([y_low, y_high]);
+y_low = mean_y;
+y_high = mean_y;
 x_low  = freqs(i_low);
 x_high = freqs(i_high);
 

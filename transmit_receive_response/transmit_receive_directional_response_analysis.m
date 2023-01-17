@@ -157,36 +157,38 @@ disp( ['Mean f_c over ', num2str(alln), ' rays: ', num2str(allmean), ' Hz'] );
 disp( ['Std  f_c over ', num2str(alln), ' rays: ', num2str(allstd), ' Hz'] );
 
 
-
+%%
 % ------------------------------------------------------------------------
 % Plot the effect of emission and incidence angle on the mean and standard
 % deviation of the recieve amplitude at the centre frequency.
 fig1 = figure;
 subplot(1, 2, 1);
 h = imagesc(bins, bins, 20*log10(mean_Afc/max(mean_Afc(:))));
-axis image;
-c = colorbar;
-colormap(getBatlow());
+c = colorbar('northoutside');
+% colormap(getBatlow());
+colormap('parula');
 ylabel('Emission [deg]');
 xlabel('Incidence [deg]');
 set(h, 'AlphaData', ~isnan(mean_Afc));
 ylabel(c, 'Mean Amplitude [dB]')
 xlim(bins([1, end]));
 ylim(bins([1, end]));
+axis square
 
 subplot(1, 2, 2);
 h = imagesc(bins, bins, 1e2*std_Afc/max(mean_Afc(:)));
-axis image;
-c = colorbar;
-colormap(getBatlow());
+c = colorbar('northoutside');
+% colormap(getBatlow());
+colormap('parula');
 ylabel('Emission [deg]');
 xlabel('Incidence [deg]');
 set(h, 'AlphaData', ~isnan(std_Afc));
 ylabel(c, 'Standard Deviation [%]')
 xlim(bins([1, end]));
 ylim(bins([1, end]));
+axis square
 
-set(fig1, 'Position', [680 817 817 281]);
+% set(fig1, 'Position', [680 817 817 281]);
 
 set(fig1,'renderer','Painters');
 figure_filename = [repo_dir, filesep, 'transmit_receive_response', filesep, 'figures', filesep, 'tx_rx_directional_response_mean_std'];

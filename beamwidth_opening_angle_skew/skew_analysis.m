@@ -119,19 +119,19 @@ disp(['Lateral skew mean = ', num2str(skew_lat_mean, 4),  ' deg, std = ', num2st
 face_colour = [175, 238, 238]/255;
 
 figure;
-% subplot(1, 2, 1);
+subplot(3, 2, 1);
 h = histogram(abs_skew_ele, 0:0.1:1);
 set(h,'facecolor',face_colour);
 xlabel('Elevational Skew [deg]');
 ylabel('Counts');
 xlim([0, Inf]);
-axis square
+ylim([0, 18])
 
 figure;
-% subplot(1, 2, 2);
+subplot(3, 2, 1);
 h = histogram(abs_skew_lat, 0:0.5:3.5);
 set(h,'facecolor',face_colour);
 xlabel('Lateral Skew [deg]');
 ylabel('Counts');
 xlim([0, Inf]);
-axis square
+ylim([0, 18])

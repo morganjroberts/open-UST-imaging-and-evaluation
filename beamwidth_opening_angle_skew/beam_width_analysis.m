@@ -102,6 +102,13 @@ mean_dB   = 20 * log10(mean_resp / max_val);
 std_resp  = std(ele_resp, 0, 3);
 std_pc    = 1e2 * std_resp / max_val;
 
+std_dB = 20 * log10( std_resp / max_val );
+std_dB = imboxfilt(std_dB, 3);
+disp([ 'Max elevational response deviation: ', num2str(max(std_dB(:))), ' dB' ]);
+
+mean_dB = imboxfilt(mean_dB, 3);
+std_pc = imboxfilt(std_pc, 3);
+
 % ------------------------------------------------------------------------
 % Plot the mean elevational response and the standard deviation
 
@@ -113,29 +120,33 @@ fig = figure;
 subplot(1, 2, 1);
 hold on;
 imagesc(y_pos*1e3, freqs*1e-6, mean_dB', [plot_thresh, 0]);
-c = colorbar;
+c = colorbar('northoutside');
 set(gca, 'YDir', 'normal');
-colormap(getBatlow);
+colormap(getColorMap);
 axis square
 ylabel('Frequency [MHz]');
 xlabel('y-position [mm]');
-ylabel(c, 'Pressure [dB]');
+ylabel(c, 'Mean Amplitude [dB]');
 % xline(y_pos(Y.imin)*1e3, 'k--', 'linewidth', 1.5);
 % xline(y_pos(Y.imax)*1e3, 'k--', 'linewidth', 1.5);
 xlim( 1e3 * y_pos([1, end]) );
 ylim( 1e-6 * freqs([1, end]) );
+box on
 
 subplot(1, 2, 2);
-imagesc(y_pos*1e3, freqs*1e-6, std_pc');
-c = colorbar;
+% imagesc(y_pos*1e3, freqs*1e-6, std_pc');
+imagesc(y_pos*1e3, freqs*1e-6, std_dB', [-60, -20]);
+c = colorbar('northoutside');
 set(gca, 'YDir', 'normal');
-colormap(getBatlow);
+colormap(getColorMap);
 axis square
 ylabel('Frequency [MHz]');
 xlabel('y-position [mm]');
-ylabel(c, 'Standard Deviation [%]');
+% ylabel(c, 'Standard Deviation [%]');
+ylabel(c, 'Standard Deviation [dB]');
 xlim( 1e3 * y_pos([1, end]) );
 ylim( 1e-6 * freqs([1, end]) );
+box on
 
 set(fig, 'Position', [404 278 932 602]);
 set(fig,'renderer','Painters');
@@ -149,13 +160,15 @@ print(fig, filename, '-depsc2');
 face_colour = [175, 238, 238]/255;
 
 figure;
+subplot(3, 2, 1);
 bin_edges = 15:0.25:17.5;
 h2 = histogram(beamwidth*1e3, bin_edges);
 set(h2,'facecolor',face_colour);
 xlabel('Beamwidth [mm]');
 ylabel('Counts');
-axis square
 xlim(bin_edges([2, end]))
+xlim([15, 17.5])
+ylim([0, 12])
 
 % set(fig,'renderer','Painters');
 % filename = [pwd, '\figures\beamwidth_histogram'];

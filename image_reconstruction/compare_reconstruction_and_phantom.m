@@ -44,7 +44,7 @@ fig = figure;
 % Plot the reconstruction
 subplot(1, 2, 1);
 imagesc(1e3*sart.grid_x, 1e3*sart.grid_x, recon, cRange)
-c = colorbar;
+c = colorbar('northoutside');
 xlabel('x-position [mm]');
 ylabel('y-position [mm]');
 ylim(1e3*sart.grid_x([1, end]));
@@ -52,12 +52,12 @@ xlim(1e3*sart.grid_x([1, end]));
 set(gca, 'YDir', 'normal');
 colormap(getColorMap);
 axis image
-title('Reconstruction');
+% title('Reconstruction');
 
 % Plot the phantom
 subplot(1, 2, 2);
 imagesc(1e3*sart.grid_x, 1e3*sart.grid_x, phantom, cRange)
-c = colorbar;
+c = colorbar('northoutside');
 xlabel('x-position [mm]');
 ylabel('y-position [mm]');
 ylim(1e3*sart.grid_x([1, end]));
@@ -66,9 +66,9 @@ ylabel(c, 'Sound Speed [m/s]');
 set(gca, 'YDir', 'normal');
 colormap(getColorMap);
 axis image
-title('True Values');
+% title('True Values');
 
-set(fig, 'Position', [404 278 932 602]);
+% set(fig, 'Position', [404 278 932 602]);
 set(fig,'renderer','Painters');
 filename = [pwd, '\figures\phantom_reconstruction_comparison'];
 print(fig, filename, '-dsvg');
