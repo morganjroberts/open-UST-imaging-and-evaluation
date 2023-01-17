@@ -54,9 +54,9 @@ em_length = 300;
 element_mask = ~isnan(i_tof_water);
 
 Nsig   = 100;
-Nxtalk = 65;
+Nxtalk = 80;
 Nnoise = 50;
-Ngap = 8;
+Ngap   = 6;
 
 Nall = Nsig + Nxtalk + Nnoise + (2 * Ngap);
 i_sig = Nxtalk + Nnoise + (2 * Ngap) + 1;
@@ -124,7 +124,15 @@ for tdx = 1:Ntx
     end
 end
 
-figure; imagesc(squeeze(xtalk(1,:,:)))
+figure; imagesc(squeeze(xtalk(1,:,:)));
+figure; plot(squeeze(xtalk(1,:,:))');
+figure; plot(squeeze(noise(1,:,:))');
+figure; plot( squeeze(extract_data(1,:,:))' );
+xline(i_sig);
+xline(i_noise1);
+xline(i_noise2);
+xline(i_xtalk1);
+xline(i_xtalk2);
 
 Pnoise = zeros(Ntx, Nrx);
 Pxtalk = zeros(Ntx, Nrx);
