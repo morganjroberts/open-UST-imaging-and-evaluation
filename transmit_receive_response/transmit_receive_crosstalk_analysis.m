@@ -33,7 +33,7 @@ filename = 'tof_watershot1_02-Nov-2022 16-18-28';
 load([dataset, filesep, filename], 'i_tof_water');
 
 % Load mask showing which elements are opposite one another
-load([repo_dir, filesep, 'calibration', filesep, 'ideal_element_positions.mat'], 'is_opposite');
+load([repo_dir, filesep, 'calibration', filesep, 'ideal_element_positions.mat'], 'is_opposite', 'angle_TxNorm_to_RxNorm');
 
 rcvData = removeDCOffset(rcvData);
 %%
@@ -41,17 +41,37 @@ Ntx = size(rcvData, 1);
 Nrx = size(rcvData, 2);
 Nt = size(rcvData, 3);
 
+figure;
+imagesc( squeeze(rcvData(1,:,301:end)), 0.01*[min(rcvData(:)), max(rcvData(:))]);
 
-
-% replace EM pickup with noise
-% noise_sample = squeeze( rcvData(1, 178, 301:600) );
-% noise_sample = permute(noise_sample, [2, 3, 1]);
-% noise_sample = repmat(noise_sample, [Ntx, Nrx]);
-% rcvData(:,:,1:300) = noise_sample;
+% example cross talk figure for TUFFC2022
+dt = 1 / settings.acqSamplingFrequency;
+t_axis = 0:dt:(Nt - 1) * dt;
+tx  = 1;
+rxA = 178;
+rxB = 183;
+figure;
+hold on
+plot(t_axis*1e6, squeeze(rcvData(tx,rxB,:)), 'r', 'linewidth', 1.5 );
+plot(t_axis*1e6, squeeze(rcvData(tx,rxA,:)), 'k', 'linewidth', 1.5 );
+ylim([-3000, 3000]);
+xlim([116, 136]);
+xlabel('Time [\mus]');
+ylabel('Voltage [au]');
+box on
+set(gcf, 'position', [-1204 1337 560 201]);
 
 em_length = 300;
 
-element_mask = ~isnan(i_tof_water);
+crit_angle   = 90;    % data from receivers within this opening angle from the transmitter will be used
+mask         = angle_TxNorm_to_RxNorm <= crit_angle;
+
+% copy the upper triangular to the lower triangular (TOF should be same)
+i_tof_water(isnan(i_tof_water)) = 0;
+i_tof_water = i_tof_water + i_tof_water';
+i_tof_water(i_tof_water == 0) = NaN;
+figure;
+imagesc(i_tof_water);
 
 Nsig   = 100;
 Nxtalk = 80;
@@ -66,7 +86,6 @@ extract_data = zeros(Ntx, Nrx, Nall);
 noise = zeros(Ntx, Nrx, Nnoise);
 sig   = zeros(Ntx, Nrx, Nsig);
 xtalk = zeros(Ntx, Nrx, Nxtalk);
-% SNR = zeros(Ns;
 
 i_noise1 = i_sig-Ngap-Nxtalk-Ngap-Nnoise;
 i_noise2 = i_sig-Ngap-1-Nxtalk-Ngap;
@@ -75,7 +94,7 @@ i_xtalk2 = i_sig-Ngap-1;
 
 for tdx = 1:Ntx
     for rdx = 1:Nrx
-        if element_mask(tdx,rdx)
+        if mask(tdx,rdx)
             data = squeeze( rcvData(tdx, rdx, :) );
             i_fm    = i_tof_water(tdx, rdx);
             i_start = i_fm - (Nxtalk + Nnoise + (2 * Ngap));
@@ -111,7 +130,7 @@ axis image
 % noise to NaN so that xtalk power is not underestimated
 for tdx = 1:Ntx
     for rdx = 1:Nrx
-        if element_mask(tdx,rdx)
+        if mask(tdx,rdx)
             data = squeeze( xtalk(tdx, rdx, :) );
             above_t = abs(data) > thresh;
             if sum(above_t) > 1
@@ -142,7 +161,7 @@ XTALK = NaN * ones(Ntx, Nrx);
 % Actually calculate SNR and Xtalk in dB
 for tdx = 1:Ntx
     for rdx = 1:Nrx
-        if element_mask(tdx,rdx)
+        if mask(tdx,rdx)
             Pnoise(tdx, rdx) = sum(noise(tdx, rdx, :) .^ 2) / Nnoise;
             xtalk_len = length( ~isnan(xtalk(tdx, rdx, :)) );
             Pxtalk(tdx, rdx) = sum(xtalk(tdx, rdx, :) .^ 2, 'omitnan') / xtalk_len;
@@ -164,19 +183,30 @@ is_opposite = is_opposite(:);
 onaxis_SNR = onaxis_SNR(is_opposite);
 onaxis_SNR = onaxis_SNR(~isnan(onaxis_SNR));
 
+face_colour = [175, 238, 238]/255;
+
 figure;
-histogram(onaxis_SNR);
-xlabel('SNR [dB]');
+subplot(3, 2, 1);
+h = histogram(onaxis_SNR, 56:0.5:66);
+set(h,'facecolor',face_colour);
+xlabel('On-axis SNR [dB]');
 ylabel('Counts');
+xlim([56, 66]);
+ylim([0, 50]);
 
 % Vectorise and apply element mask to xtalk
 XTALK = XTALK(:);
-XTALK = XTALK(element_mask(:));
+XTALK = XTALK(mask(:));
 XTALK = XTALK(~isinf(XTALK));
+
 figure;
-histogram(XTALK)
+subplot(3, 2, 1);
+h = histogram(XTALK, -56:2:-24);
+set(h,'facecolor',face_colour);
 xlabel('Receive Crosstalk [dB]');
 ylabel('Counts');
+xlim([-56, -24]);
+ylim([0, 2100]);
 
 mean_xtalk = mean(XTALK);
 std_xtalk = std(XTALK);
@@ -185,6 +215,7 @@ std_SNR = std(onaxis_SNR);
 
 disp( ['Mean Xtalk: ', num2str(mean_xtalk), ' dB, std: ', num2str(std_xtalk), ' dB'] );
 disp( ['Mean SNR (onaxis): ', num2str(mean_SNR), ' dB, std: ', num2str(std_SNR), ' dB'] );
+disp( ['Nmask = ', num2str(sum(mask, 'all', 'omitnan'))] );
 
 example = squeeze(extract_data(1,178,:));
 % example(i_noise1:i_noise2) = example(i_noise1:i_noise2) / max(example(i_noise1:i_noise2));
