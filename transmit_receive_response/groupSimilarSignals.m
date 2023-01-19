@@ -68,8 +68,10 @@ g_data = squeeze(data(mask, :));
 % Align the grouped data in time if required
 if options.Align
     g_data_aligned = zeros(size(g_data));
-    
+
     N = size(g_data, 1);
+
+    delays = zeros(1, N);    
     
     master = g_data(1, :);
     tic;
@@ -92,12 +94,23 @@ if options.Align
         % Find the best alignment and store
         [~,I] = max(r);
         lag   = lags(I);
+        delays(idx) = lag;
         g_data_aligned(idx, :) = circshift(trace, lag);
         
     end
     disp(['Completed in ', num2str(toc),  's']);
     fprintf('\n');
+
+    if options.ExtraPlot
+        figure;
+        histogram(delays);
+    end
+    mean_delay = mean(delays);
+    std_delay = std(delays);
+    disp( ['Mean delay: ', num2str(mean_delay), ' pts, std: ', num2str(std_delay), ' pts'] );
 end
+
+
 
 % Plot the data if required
 if options.ExtraPlot
