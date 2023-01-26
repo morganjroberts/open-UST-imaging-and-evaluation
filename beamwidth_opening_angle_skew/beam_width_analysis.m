@@ -134,16 +134,16 @@ ylim( 1e-6 * freqs([1, end]) );
 box on
 
 subplot(1, 2, 2);
-% imagesc(y_pos*1e3, freqs*1e-6, std_pc');
-imagesc(y_pos*1e3, freqs*1e-6, std_dB', [-60, -20]);
+imagesc(y_pos*1e3, freqs*1e-6, std_pc', [0, 12]);
+% imagesc(y_pos*1e3, freqs*1e-6, std_dB', [-60, -20]);
 c = colorbar('northoutside');
 set(gca, 'YDir', 'normal');
 colormap(getColorMap);
 axis square
 ylabel('Frequency [MHz]');
 xlabel('y-position [mm]');
-% ylabel(c, 'Standard Deviation [%]');
-ylabel(c, 'Standard Deviation [dB]');
+ylabel(c, 'Standard Deviation [%]');
+% ylabel(c, 'Standard Deviation [dB]');
 xlim( 1e3 * y_pos([1, end]) );
 ylim( 1e-6 * freqs([1, end]) );
 box on

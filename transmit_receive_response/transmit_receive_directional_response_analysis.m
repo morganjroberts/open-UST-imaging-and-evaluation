@@ -163,7 +163,7 @@ disp( ['Std  f_c over ', num2str(alln), ' rays: ', num2str(allstd), ' Hz'] );
 % deviation of the recieve amplitude at the centre frequency.
 fig1 = figure;
 subplot(1, 2, 1);
-h = imagesc(bins, bins, 20*log10(mean_Afc/max(mean_Afc(:))));
+h = imagesc(bins, bins, 20*log10(mean_Afc/max(mean_Afc(:))), [-15, 0]);
 c = colorbar('northoutside');
 % colormap(getBatlow());
 colormap('parula');
@@ -196,3 +196,4 @@ print(fig1, figure_filename, '-depsc2');
 print(fig1, figure_filename, '-dsvg');
 
 disp([ 'Max std dev ', num2str( max( 1e2*std_Afc/max(mean_Afc(:)), [], 'all' ) ), ' %' ]);
+disp( ['Min amplitude: ', num2str(min(20*log10(mean_Afc/max(mean_Afc(:))), [], 'all')), ' dB'] );

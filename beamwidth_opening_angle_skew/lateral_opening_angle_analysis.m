@@ -179,20 +179,22 @@ xlabel('Theta [deg]');
 xlim( theta([1, end]) );
 ylim( 1e-6 * freqs([1, end]) );
 ylabel(c, 'Mean Amplitude [dB]');
+box on
 
 subplot(1, 2, 2);
-% imagesc(theta, 1e-6*freqs, std_pc');
-imagesc(theta, 1e-6*freqs, std_dB', [-60, -20]);
+imagesc(theta, 1e-6*freqs, std_pc', [0, 12]);
+% imagesc(theta, 1e-6*freqs, std_dB', [-60, -20]);
 c = colorbar('northoutside');
 set(gca, 'YDir', 'normal');
 colormap(getColorMap);
 axis square
 ylabel('Frequency [MHz]');
 xlabel('Theta [deg]');
-% ylabel(c, 'Standard Deviation [%]');
-ylabel(c, 'Standard Deviation [dB]');
+ylabel(c, 'Standard Deviation [%]');
+% ylabel(c, 'Standard Deviation [dB]');
 xlim( theta([1, end]) );
 ylim( 1e-6 * freqs([1, end]) );
+box on
 
 % set(fig, 'Position', [404 278 932 602]);
 

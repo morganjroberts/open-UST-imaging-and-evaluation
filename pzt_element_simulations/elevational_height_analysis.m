@@ -71,6 +71,10 @@ end
 
 % Plot effect of frequency and elevation height on beamwidth
 
+% work out optimal e_height for every f
+[~,I] = min(mean_beamwidth, [], 1);
+e_opt = e_height(I);
+
 figure;
 plot(e_height*1e3, mean(mean_beamwidth, 2)*1e3, 'k-', 'linewidth', 1.5 );
 xlim( 1e3*e_height([1, end]) );
@@ -79,15 +83,21 @@ ylabel('Mean Beamwidth [mm]')
 set(gcf, 'Position', [336 1034 378 187]);
 
 figure;
-% h = imagesc(freqs*1e-6, e_height*1e3, mean_beamwidth*1e3);
+hold on
+% imagesc(e_height*1e3, freqs*1e-6, mean_beamwidth'*1e3);
 contourf( e_height*1e3, freqs*1e-6, mean_beamwidth'*1e3, 7:0.5:18);
+clim([8,18]);
+h = plot(e_opt*1e3, freqs*1e-6, 'rx');
+h.MarkerEdgeColor = 'w';
 c = colorbar;
 c.Location = 'northoutside';
 colormap(getBatlow);
 xlabel('Elevation Height [mm]');
 ylabel('Frequency [MHz]');
 ylabel(c, 'Beamwidth [mm]');
+ylim([0.8, 2]);
 axis square
+box on
 
 figure;
 imagesc(freqs*1e-6, e_height*1e3, beamwidth_c*1e3);
@@ -104,3 +114,6 @@ axis square
 bw_comp_val = beamwidth_c(edx, fdx);
 disp(['Predicted beamwidth at z = 110 mm, f = ', ...
     num2str(freqs(fdx)*1e-6), 'MHz: ', num2str(bw_comp_val*1e3), '  mm']);
+
+figure;
+plot(freqs*1e-6, mean_beamwidth(edx+1,:)*1e3)

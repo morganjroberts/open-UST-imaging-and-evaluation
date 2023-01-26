@@ -72,11 +72,13 @@ figure;
 % h = imagesc(freqs*1e-6, l_width*1e3, opening_angle);
 contourf(l_width*1e3, freqs*1e-6, opening_angle', [30:10:180]);
 c = colorbar;
+clim([40, 180])
 c.Location = 'northoutside';
 colormap(getBatlow);
 xlabel('Lateral Width [mm]');
 ylabel('Frequency [MHz]');
 ylabel(c, 'Opening Angle [deg]');
+ylim([0.8, 2]);
 axis square
 
 
